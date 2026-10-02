@@ -16,6 +16,8 @@ Antes del primer acceso, configurar las plantillas **Confirm signup** y **Magic 
 
 Render ejecuta `npm ci && npm run build` y `npm start`; `/api/health` comprueba el proceso. El archivo `render.yaml` reproduce la configuración. Las claves publishable son públicas por diseño; nunca colocar secret/service_role en NEXT_PUBLIC ni en Git.
 
+`npm run build` ejecuta las pruebas de dominio y respaldo antes de compilar; Next.js también comprueba TypeScript. GitHub Actions reproduce estas comprobaciones cuando la cuenta permite ejecutar sus runners. Una restricción de GitHub Actions no elimina las verificaciones ejecutadas por Render.
+
 El estado se conserva en JSONB por usuario para trasladar sin alterar reglas existentes. Una actualización atómica condicionada por revisión evita sobrescrituras concurrentes. Las órdenes conservan sus identificadores para evitar cobros o capturas repetidos.
 
 En Perfil se descarga un respaldo JSON versionado, que puede importarse únicamente en un espacio sin actividad. Los respaldos contienen información personal: almacenarlos cifrados fuera de Render y del repositorio. La base de datos persiste en Supabase y no depende del disco efímero de Render. El respaldo manual de Perfil no sustituye una política automatizada de respaldo; habilitar recuperación/backup según el plan de Supabase y ensayar restauración en un proyecto separado.
