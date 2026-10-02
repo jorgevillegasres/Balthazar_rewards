@@ -22,8 +22,9 @@ export function useQuest(){
  },[clearIdentity]);
  useEffect(()=>{void load();const onFocus=()=>{if(!pending.current)void load()};window.addEventListener('focus',onFocus);const interval=setInterval(onFocus,60000);return()=>{window.removeEventListener('focus',onFocus);clearInterval(interval)}},[load]);
  useEffect(()=>{if(!notice)return;const t=setTimeout(()=>setNotice(''),6000);return()=>clearTimeout(t)},[notice]);
- async function act(command:Omit<Command,'id'>){
+ async function act(command:Omit<Command,'id'>,expectedRevision?:number){
   if(pending.current||!current.current)return false;
+  if(expectedRevision!==undefined&&current.current.revision!==expectedRevision){setError('Tu espacio cambió desde esta propuesta. Consulta de nuevo antes de aplicarla.');return false}
   pending.current=true;readSequence.current++;setBusy(true);setError('');
   const signature=JSON.stringify(command);
   if(retry.current?.signature!==signature)retry.current={signature,id:crypto.randomUUID()};
@@ -39,7 +40,7 @@ export function useQuest(){
   }catch(e){setError(e instanceof Error?e.message:'No se pudo guardar. Revisa tu conexión y vuelve a intentar.');return false}
   finally{pending.current=false;setBusy(false)}
  }
- return {state:data?.state,owner:data?.owner,act,busy,error,setError,auth,loading,load,notice};
+ return {state:data?.state,revision:data?.revision,owner:data?.owner,act,busy,error,setError,auth,loading,load,notice};
 }
-export type Act=(command:Omit<Command,'id'>)=>Promise<boolean>;
+export type Act=(command:Omit<Command,'id'>,expectedRevision?:number)=>Promise<boolean>;
 

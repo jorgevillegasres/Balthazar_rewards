@@ -26,6 +26,18 @@ La PWA requiere conexión. No almacena datos privados en el service worker. Rend
 
 Las fuentes Barlow Condensed, DM Sans e IBM Plex Mono se sirven desde `/fonts` con sus licencias. La aplicación no solicita fuentes a Google durante el uso.
 
+## Asistencia contextual
+
+En Hoy → Preparar mi día, Balthazar propone hasta tres tareas disponibles según minutos y energía. En una misión → Ayúdame a empezar, propone una siguiente acción y hasta ocho pasos; guardarlos requiere confirmación y no reemplaza pasos ya avanzados. En Capturar → Con Balthazar, el texto se convierte en hasta diez borradores editables. Las fechas explícitas en formato YYYY-MM-DD se conservan; otras expresiones requieren revisión. Ninguna consulta completa misiones ni concede puntos. Iniciar cinco minutos usa el temporizador habitual, no consume automáticamente el bloque sugerido del plan.
+
+Configurar `OPENAI_API_KEY` solo en Render y `OPENAI_MODEL` si se cambia el modelo. Valor inicial: `gpt-5-mini-2025-08-07`; verificar disponibilidad de la cuenta y evaluar calidad con uso real. La API requiere facturación propia. Sin clave, las consultas muestran un aviso y el resto de la aplicación sigue funcionando. No guardar claves en Git ni usar NEXT_PUBLIC para secretos.
+
+La ruta `/api/assistant` requiere sesión y consentimiento. Envía a OpenAI el contexto mínimo de la función elegida, excluyendo identidad, economía e historial. Usa Responses API con `store:false`, salida estructurada, 2.800 tokens máximos de salida y treinta segundos de espera, sin reintentos automáticos. `store:false` no implica ausencia de toda retención por parte del proveedor: revisar sus controles de datos antes de enviar información sensible. No se persisten conversaciones completas ni se registran los textos enviados. Los pasos y tareas aceptados quedan incluidos en el respaldo normal.
+
+La cuota es de veinte consultas por día de Bogotá, compartida por todos los dispositivos y reservada atómicamente en Supabase antes de contactar al proveedor. Un intento reservado cuenta incluso si el proveedor falla. Las reservas contienen usuario y fecha, no contenido de tareas. La cuota limita solicitudes, no dinero: configurar también límites/alertas de gasto en OpenAI. La aplicación no dispone de SQL, canjes o herramientas autónomas para el modelo.
+
+La verificación automatizada cubre validación del contexto, referencias, fechas, tiempo disponible, progreso existente y transporte del proveedor simulado. La comprobación real del modelo requiere clave, facturación y una consulta consentida. Las pruebas visuales locales utilizan datos simulados; no son prueba de calidad del modelo real.
+
 ## Migración desde Sites
 
 Usar el exportador de la instalación anterior autenticado como propietario, descargar el JSON e importarlo en esta instalación después de crear el acceso. No copiar datos de pruebas locales. Mantener la instalación anterior hasta verificar tareas, saldo, historial y foco desde teléfono y computador. La instalación como PWA debe repetirse para el nuevo dominio.

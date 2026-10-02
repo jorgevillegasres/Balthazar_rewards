@@ -9,4 +9,4 @@ export async function proxy(request:NextRequest){
  response.headers.set('Cache-Control','private, no-store');
  return response;
 }
-export const config={matcher:['/api/quest','/api/backup','/api/auth/:path*','/auth/:path*']};
+export const config={matcher:['/api/quest','/api/backup','/api/assistant','/api/auth/:path*','/auth/:path*']};

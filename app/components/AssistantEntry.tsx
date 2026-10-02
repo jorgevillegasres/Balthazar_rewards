@@ -1,0 +1,3 @@
+'use client';
+import {ArrowUpRight,Hexagon} from 'lucide-react';
+export default function AssistantEntry({open,busy}:{open:()=>void;busy:boolean}){return <button className="assistant-entry" onClick={open} disabled={busy}><span className="assistant-entry-icon"><Hexagon size={32}/></span><span><span className="eyebrow">ASISTENCIA CONTEXTUAL</span><strong>¿Por dónde empezamos hoy?</strong><span className="assistant-entry-copy">Dime tu tiempo y energía. Te ayudaré a elegir un avance posible.</span></span><span className="assistant-entry-action">Preparar mi día <ArrowUpRight size={19}/></span></button>}

@@ -1,0 +1,7 @@
+'use client';
+import {Sparkles,LoaderCircle,ShieldCheck} from 'lucide-react';
+import type {Assistance} from './useAssistant';
+export function AssistantConsent({a,context}:{a:Assistance;context:string}){return <div className="assistant-consent"><label><input type="checkbox" checked={a.consent} disabled={a.busy} onChange={e=>{a.setConsent(e.target.checked);if(!e.target.checked)a.reset()}}/><span>Permito enviar {context} a OpenAI para esta asistencia.</span></label><p><ShieldCheck size={14}/>Tu correo, puntos y recompensas no se envían. Las propuestas solo se guardan cuando las aceptas.</p></div>}
+export function AssistantStatus({a}:{a:Assistance}){return <>{a.busy&&<div className="assistant-thinking" role="status"><LoaderCircle size={19} className="spin"/><span>Preparando una propuesta para ti…</span></div>}{a.error&&<p className="error-inline" role="alert">{a.error}</p>}{a.result&&<p className="assistant-budget">{a.result.remaining} consultas disponibles hoy · Las duraciones son estimaciones.</p>}</>}
+export function AssistantQuestions({questions}:{questions:string[]}){return questions.length?<aside className="assistant-questions"><strong>Antes de decidir</strong><ul>{questions.map((q,i)=><li key={i}>{q}</li>)}</ul></aside>:null}
+export function AssistantHeading({subtitle}:{subtitle:string}){return <div className="assistant-heading"><span className="assistant-emblem"><Sparkles size={21}/></span><div><div className="eyebrow">BALTHAZAR · ASISTENCIA CONTEXTUAL</div><p>{subtitle}</p></div></div>}
