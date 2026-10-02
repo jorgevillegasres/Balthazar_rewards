@@ -1,0 +1,11 @@
+import fs from 'node:fs/promises';
+const source='https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@400;500;600;700&family=DM+Sans:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500&display=swap';
+const response=await fetch(source,{headers:{'User-Agent':'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/130.0.0.0 Safari/537.36'}});
+if(!response.ok)throw Error('Font CSS download failed');
+let css=await response.text();const urls=[...new Set([...css.matchAll(/https:\/\/fonts\.gstatic\.com\/[^\s)]+/g)].map(x=>x[0]))];
+await fs.mkdir('public/fonts',{recursive:true});
+await Promise.all(urls.map(async(url,i)=>{const response=await fetch(url);if(!response.ok)throw Error('Font asset download failed');const name='font-'+i+'.'+(url.includes('.woff2')?'woff2':url.includes('.woff')?'woff':'ttf');await fs.writeFile('public/fonts/'+name,Buffer.from(await response.arrayBuffer()));css=css.replaceAll(url,'/fonts/'+name)}));
+await fs.writeFile('app/fonts.css',css);
+let global=await fs.readFile('app/globals.css','utf8');global=global.replace(/^@import url\([^\n]+\);\r?\n/,'');await fs.writeFile('app/globals.css',global);
+let layout=await fs.readFile('app/layout.tsx','utf8');if(!layout.includes("import './fonts.css';"))layout=layout.replace("import './globals.css';","import './fonts.css';\nimport './globals.css';");await fs.writeFile('app/layout.tsx',layout);
+console.log(urls.length+' fonts hosted by Balthazar.');
