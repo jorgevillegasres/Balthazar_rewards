@@ -30,7 +30,7 @@ Si el tiempo disponible es menor que una tarea, distingue un bloque parcial del 
 
 Crear una ruta privada en Render para consultas. Verificar sesión y propietario, origen público, tipo y tamaño de solicitud. El servidor consulta Supabase y construye el contexto; no acepta del navegador un estado arbitrario como fuente de verdad.
 
-La clave del proveedor se guarda como secreto de Render, nunca en el navegador ni GitHub. Proponer OpenAI API como primer proveedor; la selección de proveedor y modelo debe resolverse antes de activar llamadas. Mantener la lógica de contexto y validación separada de ese adaptador.
+La clave del proveedor se guarda como secreto de Render, nunca en el navegador ni GitHub. El propietario eligió OpenAI API. El modelo se configurará en el servidor y se seleccionará mediante una evaluación de calidad y coste antes de activar llamadas. Mantener la lógica de contexto y validación separada de ese adaptador.
 
 Exigir una salida estructurada por función y validar límites, IDs, áreas y tareas elegibles después de la respuesta. El modelo no recibe SQL, credenciales, funciones de canje, órdenes de completar tareas ni acceso general a la base. Los textos de tareas son datos, no instrucciones con autoridad sobre el sistema.
 
