@@ -5,6 +5,16 @@ import {createRepository} from '../lib/state-repository.ts';
 import {createBackup,parseBackup} from '../lib/backup.ts';
 import {allowedEmail,isSameOrigin} from '../lib/access.ts';
 
+test('public origin is accepted behind Render proxy without trusting forwarded headers',()=>{
+ const publicOrigin='https://balthazar-rewards.onrender.com';
+ const request=origin=>new Request('http://localhost:10000/api/auth',{headers:{origin,'x-forwarded-host':'evil.example','x-forwarded-proto':'https'}});
+ assert.equal(isSameOrigin(request(publicOrigin),publicOrigin),true);
+ assert.equal(isSameOrigin(request('https://evil.example'),publicOrigin),false);
+ assert.equal(isSameOrigin(request('http://localhost:10000'),publicOrigin),false);
+ assert.equal(isSameOrigin(request(publicOrigin),'invalid'),false);
+ assert.equal(isSameOrigin(new Request('http://localhost:10000/api/auth',{headers:{origin:publicOrigin,'sec-fetch-site':'cross-site'}}),publicOrigin),false);
+});
+
 function memory(){const rows=new Map();return {read:async id=>structuredClone(rows.get(id)||null),insert:async(id,state)=>{if(!rows.has(id))rows.set(id,{state:structuredClone(state),revision:0})},cas:async(id,revision,state)=>{if(rows.get(id)?.revision!==revision)return false;rows.set(id,{state:structuredClone(state),revision:revision+1});return true}}}
 test('concurrent commands preserve one winner and reject stale revision',async()=>{const repo=createRepository(memory());await repo.read('a');const results=await Promise.allSettled([repo.mutate('a',0,{id:'one',type:'energy',value:'alta'}),repo.mutate('a',0,{id:'two',type:'energy',value:'baja'})]);assert.equal(results.filter(x=>x.status==='fulfilled').length,1);assert.equal(results.find(x=>x.status==='rejected').reason.message,'CONFLICT')});
 test('retried capture is idempotent and users stay isolated',async()=>{const repo=createRepository(memory());const command={id:'retry',type:'capture',tasks:[{title:'Preparar migración'}]};await repo.read('a');await repo.mutate('a',0,command);const replay=await repo.mutate('a',0,command);assert.equal(replay.state.tasks.length,1);assert.equal(replay.revision,1);assert.equal((await repo.read('b')).state.tasks.length,0)});

@@ -9,6 +9,10 @@ Render usa Node 22, plan Free, región Ohio y despliegue automático desde main.
 
 ## Alta inicial
 
+Configurar `BALTHAZAR_APP_ORIGIN=https://balthazar-rewards.onrender.com` en Render. Es el origen público permitido para formularios y escrituras; el servidor no confía en encabezados de proxy suministrados por el cliente. Si se cambia de dominio, actualizar esta variable antes de usarlo.
+
+Supabase exige un SMTP propio para editar y guardar las plantillas. Configurarlo primero en Authentication → Email → SMTP Settings.
+
 En Supabase → Authentication → Email → Templates, incluir `{{ .Token }}` en Confirm signup y Magic Link. Después abrir `/login`, pulsar «Primera vez: crear mi acceso», introducir el correo autorizado y una contraseña de 12 caracteres o más y confirmar el código recibido por correo. El propietario elige su contraseña directamente en la aplicación.
 
 ## Traslado del progreso

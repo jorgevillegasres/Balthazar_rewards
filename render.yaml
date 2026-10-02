@@ -16,3 +16,5 @@ services:
         sync: false
       - key: BALTHAZAR_OWNER_EMAIL
         sync: false
+      - key: BALTHAZAR_APP_ORIGIN
+        sync: false
