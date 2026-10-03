@@ -12,3 +12,10 @@
 ## Pendiente de activación
 
 La clave OpenAI no estaba configurada en Render al comprobar la integración. No se ha realizado una consulta real ni evaluado la calidad del modelo real. El propietario recibió instrucciones para configurar OPENAI_API_KEY y facturación; el primer uso pide consentimiento del contexto enviado. La interfaz tiene un aviso explícito de falta de configuración. Las respuestas de prueba no se presentan como resultados de OpenAI.
+# Diagnóstico de la primera consulta real
+
+Tras configurar la clave en Render, el propietario reportó el mensaje genérico de propuesta inválida. Dos consultas reales a OpenAI con el mismo transporte de producción y contexto de prueba terminaron con HTTP 200, estado completed y propuestas aceptadas por validateProposal; una usó la frase que el propietario compartió en su captura. No se enviaron tareas ni proyectos del propietario en estas pruebas y no se guardó ni imprimió la clave.
+
+El error original todavía no se reprodujo. Se añadió instrumentación de fallos por etapa (state/context/quota/provider/validation), una referencia de ocho caracteres y metadatos acotados del proveedor. No registra solicitudes, respuestas, claves, identidades ni contenido de tareas. Los errores desconocidos se reducen a OTHER; los códigos del proveedor se limitan a una lista explícita. La referencia se muestra en el mensaje de error para correlacionar un nuevo intento del propietario con los registros.
+
+La nueva prueba comprueba que un fallo del proveedor conserva únicamente estado HTTP y código permitido, que una respuesta incompleta identifica max_output_tokens, y que códigos inesperados y mensajes privados no se registran. Las 35 pruebas pasan. Sigue pendiente reproducir el fallo desde la sesión del propietario y corregir su causa; esta instrumentación no se presenta como una corrección del error original.
