@@ -41,3 +41,15 @@ La verificación automatizada cubre validación del contexto, referencias, fecha
 ## Migración desde Sites
 
 Usar el exportador de la instalación anterior autenticado como propietario, descargar el JSON e importarlo en esta instalación después de crear el acceso. No copiar datos de pruebas locales. Mantener la instalación anterior hasta verificar tareas, saldo, historial y foco desde teléfono y computador. La instalación como PWA debe repetirse para el nuevo dominio.
+
+## Subtareas y soportes
+
+Misiones muestra tareas principales agrupadas por proyecto. Abre una tarea para añadir subtareas o convertir tareas pendientes existentes, conservando sus IDs, sesiones y soportes. Se usa un solo nivel de subtareas, con el área y proyecto de la principal. Las tareas completadas mantienen su historial. Puedes separar una subtarea pendiente y corregir una casilla marcada antes de confirmar el resultado principal.
+
+Las subtareas no conceden puntos ni XP de misión ni cuentan como victorias diarias; el enfoque conserva su XP habitual. El cierre de la principal exige completar pasos y subtareas activas y confirmar el resultado. Los hijos archivados no bloquean el cierre, pero tampoco eliminan la confirmación. La revisión muestra el tiempo acumulado de la principal y las subtareas completadas; puede corregirse antes de guardar. No se reorganizan familias durante su enfoque activo. Archivar la principal termina la sesión de enfoque de su subtarea, registrando el tiempo.
+
+En el detalle y la confirmación puedes añadir enlaces HTTP/HTTPS y archivos PDF, PNG, JPG, WEBP, TXT, DOCX, XLSX o PPTX hasta 8 MB. La aplicación limita veinte archivos y veinte enlaces por tarea. El bucket `balthazar-supports` es privado; sus políticas requieren sesión propietaria, correo permitido y una tarea existente. No se usan claves administrativas. La descarga se sirve como adjunto autenticado y no se envían soportes a OpenAI. La extensión y MIME declarado se validan; no se realiza análisis antivirus ni interpretación automática de documentos.
+
+Aplicar `supabase/migrations/20261004054200_balthazar_private_supports.sql` al reproducir la infraestructura. El límite de veinte archivos se comprueba antes/después de subir y se compensa el exceso; un propietario autorizado que use Storage directamente puede superar ese contador de la aplicación. El tamaño, tipos MIME y privacidad se aplican también en Storage. Las eliminaciones de archivos requieren confirmación en la interfaz.
+
+El respaldo JSON v1 conserva la jerarquía y los enlaces y acepta respaldos anteriores. **No incluye los archivos binarios de Storage.** Descárgalos desde los soportes y respalda el bucket por separado antes de migrar de proyecto o cuenta. Restaurar JSON no traslada esos archivos. Las tareas convertidas conservan su carpeta de archivos porque su ID no cambia.

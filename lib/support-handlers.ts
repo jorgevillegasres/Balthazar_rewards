@@ -1,0 +1,26 @@
+import type {SupabaseClient} from '@supabase/supabase-js';
+import {isSameOrigin} from './access.ts';
+import {SUPPORT_BUCKET,MAX_SUPPORT_BYTES,MAX_SUPPORT_FILES,supportFolder,supportPath,supportName,validateSupportFile} from './supports.ts';
+type SupportAuth={client:SupabaseClient;user:{id:string}};
+type Dependencies={authenticate:()=>Promise<SupportAuth|null>;read:(client:SupabaseClient,owner:string)=>Promise<{state:{tasks:{id:string}[]}}>};
+export function createSupportHandlers(dependencies:Dependencies){
+const json=(data:unknown,status=200)=>Response.json(data,{status,headers:{'Cache-Control':'private, no-store'}});
+async function context(task:string){const auth=await dependencies.authenticate();if(!auth)throw Error('UNAUTHORIZED');const folder=supportFolder(auth.user.id,task);const snapshot=await dependencies.read(auth.client,auth.user.id);if(!snapshot.state.tasks.some(t=>t.id===task))throw Error('NOT_FOUND');return {...auth,folder,bucket:auth.client.storage.from(SUPPORT_BUCKET)};}
+function failure(e:unknown){const message=e instanceof Error?e.message:'';if(message==='UNAUTHORIZED')return json({error:'Tu sesión terminó. Vuelve a entrar.'},401);if(message==='NOT_FOUND')return json({error:'No se encontró la misión o el archivo.'},404);if(message==='STORAGE_UNAVAILABLE'||message==='SUPABASE_NOT_CONFIGURED')return json({error:'El almacenamiento no está disponible. Intenta de nuevo.'},503);return json({error:message||'No se pudo procesar el soporte.'},400);}
+async function list(ctx:Awaited<ReturnType<typeof context>>){const {data,error}=await ctx.bucket.list(ctx.folder,{limit:100,sortBy:{column:'created_at',order:'desc'}});if(error)throw Error('STORAGE_UNAVAILABLE');return (data||[]).filter(x=>x.id);}
+async function GET(request:Request){try{const url=new URL(request.url),task=url.searchParams.get('task')||'',file=url.searchParams.get('file');const ctx=await context(task);if(file){const path=supportPath(ctx.user.id,task,file);const {data,error}=await ctx.bucket.download(path);if(error||!data)throw Error('NOT_FOUND');const name=supportName(file.slice(37));return new Response(data.stream(),{headers:{'Content-Type':'application/octet-stream','Content-Disposition':`attachment; filename="${name}"; filename*=UTF-8''${encodeURIComponent(name)}`,'Cache-Control':'private, no-store','X-Content-Type-Options':'nosniff'}});}const files=await list(ctx);return json({files:files.map(f=>({id:f.name,name:f.name.slice(37),size:Number(f.metadata?.size)||0,created:f.created_at}))});}catch(e){return failure(e)}}
+async function POST(request:Request){
+ if(!isSameOrigin(request))return json({error:'Solicitud no permitida.'},403);
+ if(!request.headers.get('content-type')?.startsWith('multipart/form-data'))return json({error:'Formato inválido.'},415);
+ // Bound the multipart envelope before parsing, including requests without Content-Length.
+ const length=Number(request.headers.get('content-length'));if(length>MAX_SUPPORT_BYTES+65536)return json({error:'El archivo supera 8 MB.'},413);
+ try{const auth=await dependencies.authenticate();if(!auth)throw Error('UNAUTHORIZED');const reader=request.body?.getReader();if(!reader)throw Error('Solicitud inválida.');const chunks:Uint8Array[]=[];let bytes=0;while(true){const next=await reader.read();if(next.done)break;bytes+=next.value.byteLength;if(bytes>MAX_SUPPORT_BYTES+65536){await reader.cancel();return json({error:'El archivo supera 8 MB.'},413)}chunks.push(next.value)}const body=new Uint8Array(bytes);let offset=0;for(const c of chunks){body.set(c,offset);offset+=c.length}const form=await new Request(request.url,{method:'POST',headers:{'Content-Type':request.headers.get('content-type')!},body}).formData();const task=String(form.get('task')||''),file=form.get('file');if(!(file instanceof File))throw Error('Selecciona un archivo.');const ctx=await context(task),files=await list(ctx),mime=validateSupportFile(file,files.length);const id=`${crypto.randomUUID()}_${supportName(file.name)}`,path=supportPath(ctx.user.id,task,id);const {error}=await ctx.bucket.upload(path,file,{contentType:mime,upsert:false});if(error)throw Error('STORAGE_UNAVAILABLE');
+ // Recheck concurrent uploads and task removal; compensate without changing task state.
+ try{const current=await dependencies.read(ctx.client,ctx.user.id);if(!current.state.tasks.some(t=>t.id===task))throw Error('NOT_FOUND');if((await list(ctx)).length>MAX_SUPPORT_FILES)throw Error('Máximo veinte archivos por misión.');}catch(e){await ctx.bucket.remove([path]);throw e}
+ return json({file:{id,name:supportName(file.name),size:file.size,created:new Date().toISOString()}},201);
+ }catch(e){return failure(e)}
+}
+async function DELETE(request:Request){if(!isSameOrigin(request))return json({error:'Solicitud no permitida.'},403);try{const url=new URL(request.url),task=url.searchParams.get('task')||'',file=url.searchParams.get('file')||'',ctx=await context(task),path=supportPath(ctx.user.id,task,file);const {error}=await ctx.bucket.remove([path]);if(error)throw Error('STORAGE_UNAVAILABLE');return json({ok:true});}catch(e){return failure(e)}}
+
+return {GET,POST,DELETE};
+}

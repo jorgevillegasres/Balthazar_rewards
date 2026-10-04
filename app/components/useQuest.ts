@@ -34,7 +34,8 @@ export function useQuest(){
    if(res.status===401||res.status===403||res.redirected||!res.headers.get('content-type')?.includes('application/json')){clearIdentity();throw new Error('Vuelve a entrar para acceder a tu progreso.')} const result=await res.json() as Reply;
    if(!res.ok){if(result.conflict)await load();if(result.signIn)clearIdentity();throw new Error(result.error||'No se pudo guardar.')}
    readSequence.current++;current.current=result;setData(result);retry.current=null;
-   if(command.type==='complete')setNotice('Misión completada · +'+(result.state.points-before.points)+' puntos · +'+(result.state.xp-before.xp)+' XP');
+   if(command.type==='complete'&&result.state.tasks.find(t=>t.id===command.taskId)?.parentId)setNotice('Subtarea completada. Confirma el resultado de la tarea principal cuando termines.');
+   else if(command.type==='complete')setNotice('Misión completada · +'+(result.state.points-before.points)+' puntos · +'+(result.state.xp-before.xp)+' XP');
    else if(command.type==='redeem')setNotice('Recompensa canjeada. Disfrútala, te la ganaste.');
    return true;
   }catch(e){setError(e instanceof Error?e.message:'No se pudo guardar. Revisa tu conexión y vuelve a intentar.');return false}
