@@ -29,6 +29,7 @@ export async function POST(request:Request){
  }catch(e){
   const name=e instanceof Error?e.message:'';
   if(e instanceof SyntaxError)return json({error:'Solicitud inválida.'},400);
+  if(name==='PROJECT_UNAVAILABLE')return json({error:'El proyecto elegido ya no está disponible. Actualiza tu espacio.',conflict:true},409);
   if(name==='TASK_UNAVAILABLE')return json({error:'Esta misión ya no está disponible. Actualiza tu espacio.'},409);
   const reference=crypto.randomUUID().slice(0,8);
   const knownErrors=new Set(['AI_RATE_LIMIT','AI_PROVIDER','AI_REFUSAL','AI_INVALID_RESPONSE','AI_QUOTA_UNAVAILABLE','INVALID_PROPOSAL']);
