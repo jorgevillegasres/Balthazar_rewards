@@ -38,6 +38,16 @@ La cuota es de veinte consultas por día de Bogotá, compartida por todos los di
 
 La verificación automatizada cubre validación del contexto, referencias, fechas, tiempo disponible, progreso existente y transporte del proveedor simulado. La comprobación real del modelo requiere clave, facturación y una consulta consentida. Las pruebas visuales locales utilizan datos simulados; no son prueba de calidad del modelo real.
 
+## Conversación con Balta
+
+Hoy → Hablar con Balthazar abre una conversación fluida en español por WebRTC. Requiere micrófono, conexión y consentimiento para enviar voz y contexto actual a OpenAI. Puede proponer un plan, capturar misiones con o sin proyecto y dividir una principal en subtareas. Los borradores se revisan y editan en pantalla; solo Guardar/Aplicar cambia el estado. No completa misiones ni concede recompensas. Conserva las misiones completadas en sus posiciones del día.
+
+La clave existente `OPENAI_API_KEY` se usa exclusivamente en el servidor. `OPENAI_REALTIME_MODEL` es opcional; el valor inicial es `gpt-realtime-2.1`. Una apertura y cada propuesta consumen una reserva de la cuota diaria compartida. Se limita cada sesión a cinco minutos mediante cierre del cliente y temporizador del servidor; los reinicios y fallos de red/proveedor impiden garantizar un límite monetario estricto. No se persiste audio ni conversación en Balthazar. Los controles de retención del proveedor son independientes.
+
+«Hola Balta» es optativo: requiere panel abierto y visible y reconocimiento local en español compatible con `SpeechRecognition.processLocally`. Si el navegador permite descargar su paquete local, se ofrece un botón para prepararlo. No se sustituye por reconocimiento remoto. Donde no esté disponible se usa el botón de conversación. Ocultar la aplicación o salir detiene las pistas del micrófono y la escucha; no funciona con la pantalla bloqueada ni con la aplicación cerrada.
+
+Las pruebas automatizadas y la interfaz usan transporte y audio simulados. La aceptación con micrófono, reproducción real de OpenAI y navegador móvil requiere una sesión del propietario.
+
 ## Migración desde Sites
 
 Usar el exportador de la instalación anterior autenticado como propietario, descargar el JSON e importarlo en esta instalación después de crear el acceso. No copiar datos de pruebas locales. Mantener la instalación anterior hasta verificar tareas, saldo, historial y foco desde teléfono y computador. La instalación como PWA debe repetirse para el nuevo dominio.
