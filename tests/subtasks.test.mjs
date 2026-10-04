@@ -3,6 +3,17 @@ import assert from 'node:assert/strict';
 import {fresh,apply,available} from '../app/lib/domain.ts';
 import {createBackup,parseBackup} from '../lib/backup.ts';
 const setup=()=>apply(fresh(),{id:'seed',type:'capture',tasks:[{title:'Preparar clase'},{title:'Preparar ejercicios'}]});
+
+test('editing cannot invent or remove completed steps by shifting their position',()=>{
+ let s=apply(fresh(),{id:'seed',type:'capture',tasks:[{title:'Acción',steps:['Elegir datos','Redactar ejercicio']}]});const t=s.tasks[0];s=apply(s,{id:'step',type:'step',taskId:t.id});
+ for(const steps of [['Nuevo requisito','Elegir datos','Redactar ejercicio'],['Redactar ejercicio','Elegir datos'],['Elegir otros datos','Redactar ejercicio'],['Redactar ejercicio'],[]])assert.throws(()=>apply(s,{id:crypto.randomUUID(),type:'editTask',taskId:t.id,title:t.title,steps}),/pasos completados/);
+ assert.deepEqual(s.tasks[0].steps,['Elegir datos','Redactar ejercicio']);assert.equal(s.tasks[0].stepsDone,1);
+});
+test('editing pending steps and metadata preserves completed prefix and rewards',()=>{
+ let s=apply(fresh(),{id:'seed',type:'capture',tasks:[{title:'Acción',steps:['Elegir datos','Redactar ejercicio']}]});const t=s.tasks[0];s=apply(s,{id:'step',type:'step',taskId:t.id});
+ s=apply(s,{id:'edit',type:'editTask',taskId:t.id,title:'Acción mejor definida',minutes:45,steps:['Elegir datos','Validar requisitos','Redactar ejercicio']});assert.equal(s.tasks[0].stepsDone,1);assert.equal(s.tasks[0].estimated,45);assert.equal(s.points,0);assert.equal(s.xp,0);
+ s=apply(s,{id:'pending-remove',type:'editTask',taskId:t.id,title:t.title,steps:['Elegir datos']});assert.equal(s.tasks[0].stepsDone,1);assert.deepEqual(s.tasks[0].steps,['Elegir datos']);
+});
 test('conversion preserves identity and sessions, inherits project and removes child from daily selection',()=>{
  let s=setup();s=apply(s,{id:'project',type:'project',name:'Curso',area:'Docencia'});s.tasks[0].projectId=s.projects[0].id;s.tasks[0].area='Docencia';const [parent,child]=s.tasks;s.sessions.push({taskId:child.id,seconds:60,at:Date.now(),kind:'normal'});
  s=apply(s,{id:'convert',type:'reparent',taskId:child.id,parentId:parent.id});assert.equal(s.tasks[1].parentId,parent.id);assert.equal(s.tasks[1].area,'Docencia');assert.equal(s.tasks[1].projectId,s.projects[0].id);assert.equal(s.sessions[0].taskId,child.id);s.tasks[1].status='PLANIFICADA';assert.equal(available(s.tasks[1],s),false);

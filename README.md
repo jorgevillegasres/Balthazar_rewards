@@ -57,3 +57,7 @@ El respaldo JSON v1 conserva la jerarquía y los enlaces y acepta respaldos ante
 ## Ejecución desde Hoy
 
 Las tarjetas de Hoy muestran el avance de subtareas y permiten elegir una acción disponible respetando dependencias y estados de la principal. Los pasos pendientes de una subtarea pueden revisarse desde su detalle; el arranque de cinco minutos sigue siendo una elección explícita. Tras confirmar una subtarea desde enfoque, se vuelve al detalle de la principal. Completar todas las acciones ofrece revisar el resultado, sin cerrar automáticamente la misión ni duplicar recompensas. El contador de Inbox cuenta principales. La asistencia para empezar ofrece retomar la sesión si queda una abierta.
+
+## Edición del avance
+
+Los pasos completados se muestran protegidos en el editor. Solo se editan los pendientes; el servidor rechaza cambiar, reordenar o eliminar el prefijo ya completado. No se recalcula ni se corrige automáticamente el historial existente. Guardar o cancelar una edición vuelve al detalle de esa misma tarea. En Hoy, las misiones completadas muestran minutos reales y puntos concedidos; las pendientes conservan su estimación.
