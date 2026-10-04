@@ -53,3 +53,7 @@ En el detalle y la confirmación puedes añadir enlaces HTTP/HTTPS y archivos PD
 Aplicar `supabase/migrations/20261004054200_balthazar_private_supports.sql` al reproducir la infraestructura. El límite de veinte archivos se comprueba antes/después de subir y se compensa el exceso; un propietario autorizado que use Storage directamente puede superar ese contador de la aplicación. El tamaño, tipos MIME y privacidad se aplican también en Storage. Las eliminaciones de archivos requieren confirmación en la interfaz.
 
 El respaldo JSON v1 conserva la jerarquía y los enlaces y acepta respaldos anteriores. **No incluye los archivos binarios de Storage.** Descárgalos desde los soportes y respalda el bucket por separado antes de migrar de proyecto o cuenta. Restaurar JSON no traslada esos archivos. Las tareas convertidas conservan su carpeta de archivos porque su ID no cambia.
+
+## Ejecución desde Hoy
+
+Las tarjetas de Hoy muestran el avance de subtareas y permiten elegir una acción disponible respetando dependencias y estados de la principal. Los pasos pendientes de una subtarea pueden revisarse desde su detalle; el arranque de cinco minutos sigue siendo una elección explícita. Tras confirmar una subtarea desde enfoque, se vuelve al detalle de la principal. Completar todas las acciones ofrece revisar el resultado, sin cerrar automáticamente la misión ni duplicar recompensas. El contador de Inbox cuenta principales. La asistencia para empezar ofrece retomar la sesión si queda una abierta.

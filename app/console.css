@@ -347,3 +347,5 @@ main>.eyebrow { color:var(--lavender); font:11px var(--mono); letter-spacing:1.4
 
 .result-consent{display:flex;align-items:flex-start;gap:12px;padding:16px;background:var(--raised);border-left:3px solid var(--accent)}.result-consent input[type=checkbox]{width:20px;height:20px;min-width:20px;margin:2px 0;accent-color:var(--accent)}
 .support-panel>.spread{gap:10px;flex-wrap:wrap;margin:12px 0}.support-panel>.spread>span{min-width:0;flex:1;overflow-wrap:anywhere}.support-panel>.spread>a{overflow-wrap:anywhere}
+
+.daily-execution{margin-top:16px}.daily-execution .progress{margin-bottom:12px}.daily-execution select{width:100%;margin-top:8px}.daily-execution .mission-actions{flex-wrap:wrap;gap:10px}.daily-execution .next-action{overflow-wrap:anywhere}
