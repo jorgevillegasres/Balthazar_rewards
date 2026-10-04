@@ -4,6 +4,8 @@ import {createSupportHandlers} from '../lib/support-handlers.ts';
 import {MAX_SUPPORT_BYTES} from '../lib/supports.ts';
 const fileId='12345678-1234-1234-1234-123456789abc_a.pdf';
 const origin='https://example.test';
+// Isolate synthetic request origins from the deployment environment.
+process.env.BALTHAZAR_APP_ORIGIN=origin;
 function setup({tasks=['task'],counts=[0,1],authenticated=true}={}){
  const calls=[];let countIndex=0;
  const bucket={list:async(folder)=>{calls.push(['list',folder]);return {data:Array.from({length:counts[Math.min(countIndex++,counts.length-1)]},(_,i)=>({id:String(i),name:fileId,metadata:{size:3},created_at:'2026-10-04'})),error:null}},download:async(path)=>{calls.push(['download',path]);return {data:new Blob(['private bytes']),error:null}},upload:async(path,file,options)=>{calls.push(['upload',path,file.size,options]);return {error:null}},remove:async(paths)=>{calls.push(['remove',paths]);return {error:null}}};

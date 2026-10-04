@@ -13,3 +13,5 @@
 Límites: subida/descarga autenticadas con binario real requieren la sesión del propietario; se probaron mediante clientes simulados y políticas RLS en transacción, no mediante esa sesión. La validación usa extensión/MIME declarado y no antivirus. El contador veinte pertenece al flujo de la app; el propietario autorizado podría superarlo directamente con Storage. JSON conserva jerarquía/enlaces, pero no archivos binarios: requieren respaldo separado.
 
 Compilación final: npm run build terminó con código 0; 59 pruebas aprobadas, TypeScript y compilación de Next.js correctos. Publicación se verifica después del push, mediante commit activo y endpoints de producción.
+
+Se reprodujo el fallo de Render con BALTHAZAR_APP_ORIGIN de producción: cinco pruebas usaban el origen ficticio sin aislar esa variable. Se fijó el origen únicamente en el proceso de pruebas; sin cambios a la protección de producción. Build completo repetido con el origen de producción: 59/59 pruebas y compilación correctos.
