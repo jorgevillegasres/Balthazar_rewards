@@ -2,7 +2,7 @@ export const MAX_BACKUP_BYTES=64*1024*1024;
 // Reserve room for the revision and request envelope around a full-size file.
 export const MAX_BACKUP_REQUEST_BYTES=MAX_BACKUP_BYTES+1024;
 export const BACKUP_SIZE_ERROR='El archivo excede 64 MB.';
-export async function readBackupRequest(request:Request,maxBytes=MAX_BACKUP_REQUEST_BYTES){
+export async function readRequestText(request:Request,maxBytes:number,sizeError:string){
  if(!request.body)return '';
  const reader=request.body.getReader(),decoder=new TextDecoder(),parts:string[]=[];
  let bytes=0;
@@ -11,10 +11,13 @@ export async function readBackupRequest(request:Request,maxBytes=MAX_BACKUP_REQU
    const {done,value}=await reader.read();
    if(done)break;
    bytes+=value.byteLength;
-   if(bytes>maxBytes){await reader.cancel();throw Error(BACKUP_SIZE_ERROR)}
+   if(bytes>maxBytes){await reader.cancel().catch(()=>{});throw Error(sizeError)}
    parts.push(decoder.decode(value,{stream:true}));
   }
   parts.push(decoder.decode());
   return parts.join('');
  }finally{reader.releaseLock()}
+}
+export async function readBackupRequest(request:Request,maxBytes=MAX_BACKUP_REQUEST_BYTES){
+ return readRequestText(request,maxBytes,BACKUP_SIZE_ERROR);
 }

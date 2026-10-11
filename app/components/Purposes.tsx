@@ -18,7 +18,7 @@ export default function Purposes({s,act,busy,error,project}:{s:State;act:Act;bus
   if(await act({type:'purpose',purposeId:selected?.id,title:fields.get('title'),area:fields.get('area'),description:fields.get('description'),due:fields.get('due')}))setEditing(null);
  }
  return <>
-  <div className="page-tools"><div className="tabs"><button className={tab==='active'?'selected':''} onClick={()=>setTab('active')}>Activos</button><button className={tab==='archived'?'selected':''} onClick={()=>setTab('archived')}>Archivados</button></div><button className="button" disabled={busy||purposes.length>=100} onClick={()=>setEditing('new')}><Plus size={18}/>Nuevo propósito</button></div>
+  <div className="page-tools"><div className="tabs"><button aria-pressed={tab==='active'} className={tab==='active'?'selected':''} onClick={()=>setTab('active')}>Activos</button><button aria-pressed={tab==='archived'} className={tab==='archived'?'selected':''} onClick={()=>setTab('archived')}>Archivados</button></div><button className="button" disabled={busy||purposes.length>=100} onClick={()=>setEditing('new')}><Plus size={18}/>Nuevo propósito</button></div>
   <p className="muted">Define el resultado que quieres alcanzar y conecta los proyectos que lo hacen posible.</p>
   <div className="project-grid purpose-grid">{purposes.filter(p=>p.status===tab).map(p=>{const m=purposeMetrics(s,p.id);return <article className="card purpose-card" key={p.id}>
    <div className="eyebrow"><Target size={18}/>{p.area}</div><h3>{p.title}</h3>{p.description&&<p>{p.description}</p>}{p.due&&<p className="small muted">Fecha objetivo: {p.due}</p>}

@@ -1,12 +1,13 @@
 'use client';
 
-import {useRef,useState} from 'react';
+import {useEffect,useRef,useState} from 'react';
 
 import type {State} from '../lib/domain';
 
 import type {Proposal} from '../../lib/assistant';
 
 import {proposalCommand} from '../../lib/harness';
+import {textOperations,rejectedTextOperation,type PendingTextOperation} from '../../lib/text-operations';
 
 import type {Act} from './useQuest';
 
@@ -16,25 +17,51 @@ import {AssistantQuestions} from './AssistantCommon';
 
 type Result={proposal:Proposal;revision:number;operationId:string;status:'pending'|'executed'|'undone'};
 
-export default function ControlDialog({s,revision,refresh,act,busy,error,close,initialKind='capture',initialTaskId='',initialProjectId=''}:{s:State;revision:number;refresh:()=>Promise<void>;act:Act;busy:boolean;error:string;close:()=>void;initialKind?:'capture'|'day'|'task';initialTaskId?:string;initialProjectId?:string}){
+export default function ControlDialog({s,revision,refresh,act,busy,error,close,owner,initialKind='capture',initialTaskId='',initialProjectId=''}:{s:State;revision:number;refresh:()=>Promise<void>;act:Act;busy:boolean;error:string;close:()=>void;owner:string;initialKind?:'capture'|'day'|'task';initialTaskId?:string;initialProjectId?:string}){
 
- const [kind,setKind]=useState<'capture'|'day'|'task'|'project'>(initialKind),[text,setText]=useState(''),[projectId,setProject]=useState(initialProjectId),[taskId,setTask]=useState(initialTaskId),[minutes,setMinutes]=useState(25),[energy,setEnergy]=useState(s.profile.energy),[auto,setAuto]=useState(true),[consent,setConsent]=useState(false),[working,setWorking]=useState(false),[message,setMessage]=useState(''),[result,setResult]=useState<Result|null>(null),[uncertain,setUncertain]=useState(false);
-
- const requestId=useRef<string|null>(null),requestBody=useRef<string|null>(null);
+ const [previous]=useState(()=>textOperations.pending(owner));
+ const recovered=previous?JSON.parse(previous.body):null;
+ const [kind,setKind]=useState<'capture'|'day'|'task'|'project'>(recovered?.kind||initialKind),[text,setText]=useState(recovered?.text||''),[projectId,setProject]=useState(recovered?.projectId||initialProjectId),[taskId,setTask]=useState(recovered?.taskId||initialTaskId),[minutes,setMinutes]=useState(recovered?.minutes||25),[energy,setEnergy]=useState(recovered?.energy||s.profile.energy),[auto,setAuto]=useState(recovered?recovered.mode==='auto':true),[consent,setConsent]=useState(!!recovered?.consent),[working,setWorking]=useState(false),[message,setMessage]=useState(previous?'Hay una operación pendiente. Comprueba su resultado antes de continuar.':''),[result,setResult]=useState<Result|null>(null),[uncertain,setUncertain]=useState(!!previous);
+ const mounted=useRef(true);
+ useEffect(()=>{mounted.current=true;return()=>{mounted.current=false}},[]);
+ const request=useRef<PendingTextOperation|null>(previous);
 
  const stale=!!result&&result.revision!==revision;
 
- async function acceptReply(data:Result){if(!data.proposal){setUncertain(true);setMessage('La operación sigue pendiente. Comprueba su resultado antes de continuar.');return}setResult(data);setUncertain(false);requestId.current=null;requestBody.current=null;if(data.status==='executed'||data.status==='undone')await refresh()}
+ function resolve(operation:PendingTextOperation){textOperations.resolve(owner,operation.operationId);if(request.current?.operationId===operation.operationId)request.current=null;setUncertain(false)}
+ async function acceptReply(data:Result&{status:string},operation:PendingTextOperation){
+  // A closed panel leaves recovery to the next instance, including successful replies.
+  if(!mounted.current||textOperations.pending(owner)?.operationId!==operation.operationId)return;
+  if(data.operationId!==operation.operationId)throw Error('No se pudo verificar la operación.');
+  if(['failed','rejected'].includes(data.status)){resolve(operation);setMessage('La operación no se ejecutó. Puedes consultar de nuevo.');return}
+  if(!data.proposal){setUncertain(true);setMessage('La operación sigue pendiente. Comprueba su resultado antes de continuar.');return}
+  setResult(data);resolve(operation);setMessage('');if(data.status==='executed'||data.status==='undone')await refresh();
+ }
 
- async function check(){if(!requestId.current)return;setWorking(true);try{const res=await fetch('/api/harness?id='+encodeURIComponent(requestId.current),{cache:'no-store'});const data=await res.json();if(!res.ok)throw Error(data.error);if(['failed','rejected'].includes(data.status)){setUncertain(false);requestId.current=null;requestBody.current=null;setMessage('La operación no se ejecutó. Puedes consultar de nuevo.')}else await acceptReply(data)}catch(e){setMessage(e instanceof Error?e.message:'No se pudo comprobar el resultado.')}finally{setWorking(false)}}
+ async function check(){const operation=request.current;if(!operation||working)return;setWorking(true);try{const res=await fetch('/api/harness?id='+encodeURIComponent(operation.operationId),{cache:'no-store'});const data=await res.json();if(!res.ok)throw Error(data.error);await acceptReply(data,operation)}catch(e){if(mounted.current)setMessage(e instanceof Error?e.message:'No se pudo comprobar el resultado.')}finally{if(mounted.current)setWorking(false)}}
 
- async function send(){if(kind==='project')return;setWorking(true);setMessage('');setResult(null);requestId.current??=crypto.randomUUID();requestBody.current??=JSON.stringify({kind,text,projectId,taskId,minutes,energy,revision,consent,source:'text',mode:auto?'auto':'review',operationId:requestId.current});try{const res=await fetch('/api/harness',{method:'POST',headers:{'Content-Type':'application/json'},body:requestBody.current});const data=await res.json();if(!res.ok){if(data.conflict)await refresh();if(res.status<500&&res.status!==409){requestId.current=null;requestBody.current=null;setUncertain(false)}else setUncertain(true);throw Error(data.error)}await acceptReply(data)}catch(e){setMessage(e instanceof Error?e.message:'Se perdió la conexión. Comprueba el resultado antes de reintentar.');if(requestId.current)setUncertain(true)}finally{setWorking(false)}}
+ async function send(retry=false){
+  if(kind==='project'||working)return;
+  if(!request.current){
+   if(retry)return;
+   const operationId=crypto.randomUUID(),operation={operationId,body:JSON.stringify({kind,text,projectId,taskId,minutes,energy,revision,consent,source:'text',mode:auto?'auto':'review',operationId})};
+   try{textOperations.begin(owner,operation);request.current=operation}catch{setUncertain(true);setMessage('Comprueba la operación anterior antes de continuar.');return}
+  }else if(!retry){setUncertain(true);return}
+  const operation=request.current;
+  setWorking(true);setMessage('');setResult(null);setUncertain(true);
+  try{
+   const res=await fetch('/api/harness',{method:'POST',headers:{'Content-Type':'application/json'},body:operation.body}),data=await res.json();
+   if(!mounted.current)return;
+   if(!res.ok){if(data.conflict)await refresh();if(rejectedTextOperation(res.status,!!data.conflict))resolve(operation);throw Error(data.error||'No se pudo completar la operación.')}
+   await acceptReply(data,operation);
+  }catch(e){if(mounted.current){setMessage(e instanceof Error?e.message:'Se perdió la conexión. Comprueba el resultado antes de reintentar.');if(request.current)setUncertain(true)}}finally{if(mounted.current)setWorking(false)}
+ }
 
  async function apply(){if(!result||result.proposal.questions.length||kind==='project')return;try{const command=proposalCommand(s,{kind,taskId},result.proposal);if(await act({type:'baltaAction',operationId:result.operationId,source:'text',summary:result.proposal.summary.slice(0,300),inputRevision:result.revision,command},result.revision))setResult({...result,status:'executed'})}catch(e){setMessage(e instanceof Error&&e.message==='DUPLICATE_TASK'?'Hay tareas repetidas; corrige el borrador.':'Revisa el borrador antes de aplicar.') }}
 
  return <Dialog title="Centro de control · Balta" close={close}>
 
- <p className="muted">Dime qué necesitas. Una instrucción explícita puede guardar acciones internas; las preguntas y dudas muestran un borrador.</p>
+ {kind!=='project'&&<p className="muted">Dime qué necesitas. Una instrucción explícita puede guardar acciones internas; las preguntas y dudas muestran un borrador.</p>}
 
  <fieldset disabled={busy||working||uncertain} style={{border:0,padding:0,margin:0}}>
 
@@ -48,18 +75,18 @@ export default function ControlDialog({s,revision,refresh,act,busy,error,close,i
 
  {kind==='day'&&<div className="form-grid"><label>Minutos disponibles<input type="number" min={5} max={480} value={minutes} onChange={e=>setMinutes(Number(e.target.value))}/></label><label>Energía<select value={energy} onChange={e=>setEnergy(e.target.value as typeof energy)}><option>baja</option><option>media</option><option>alta</option></select></label></div>}
 
- <label>Tu instrucción o pregunta<textarea maxLength={5000} rows={4} value={text} onChange={e=>{setText(e.target.value);setResult(null)}} placeholder="Crea una tarea para revisar el informe"/></label>
+ {kind!=='project'&&<><label>Tu instrucción o pregunta<textarea maxLength={5000} rows={4} value={text} onChange={e=>{setText(e.target.value);setResult(null)}} placeholder="Crea una tarea para revisar el informe"/></label>
 
  <label className="assistant-consent"><input type="checkbox" checked={auto} onChange={e=>setAuto(e.target.checked)}/>{auto?'Autonomía interna':'Revisar todo'} · Puedes elegir revisar cada propuesta.</label>
 
- <label className="assistant-consent"><input type="checkbox" checked={consent} onChange={e=>setConsent(e.target.checked)}/>Permito enviar esta solicitud y el contexto necesario a OpenAI durante esta sesión.{kind==='day'&&' Incluye hasta 20 rutinas previstas hoy: título, duración y estado.'}</label>
+ <label className="assistant-consent"><input type="checkbox" checked={consent} onChange={e=>setConsent(e.target.checked)}/>Permito enviar esta solicitud, mis áreas, los datos de los proyectos y misiones necesarios para esta acción y hasta 20 propósitos activos (título, descripción, área y fecha) a OpenAI durante esta sesión.{kind==='day'&&' Incluye hasta 20 rutinas previstas hoy: título, duración y estado.'}</label>
 
- <button className="button full" disabled={!consent||!text.trim()||kind==='task'&&!taskId||!Number.isInteger(minutes)||minutes<5||minutes>480} onClick={()=>{void send()}}>{working?'Consultandoââ‚¬¦':'Enviar a Balta'}</button>
+ <button className="button full" disabled={!consent||!text.trim()||kind==='task'&&!taskId||!Number.isInteger(minutes)||minutes<5||minutes>480} onClick={()=>{void send()}}>{working?'Consultando…':'Enviar a Balta'}</button></>}
 
  {kind==='project'&&<section className="voice-draft"><h3>Resumen actual del proyecto</h3>{projectId?<><p>{s.projects.find(p=>p.id===projectId)?.name} · {s.projects.find(p=>p.id===projectId)?.area}</p><p>Propósito: {s.purposes?.find(p=>p.id===s.projects.find(project=>project.id===projectId)?.purposeId)?.title||'Sin propósito vinculado'}</p><p>{s.tasks.filter(t=>!t.parentId&&t.projectId===projectId&&!t.completed&&!['CANCELADA','ARCHIVADA','COMPLETADA'].includes(t.status)).length} misiones principales pendientes · {s.tasks.filter(t=>!t.parentId&&t.projectId===projectId&&!!t.completed).length} completadas</p>{s.tasks.filter(t=>!t.parentId&&t.projectId===projectId&&!t.completed&&!['CANCELADA','ARCHIVADA','COMPLETADA'].includes(t.status)).slice(0,20).map(t=><p key={t.id}><strong>{t.title}</strong> · {t.status}{t.due?' · Vence '+t.due:''}<br/>{t.nextAction}</p>)}</>:<p>Selecciona un proyecto para ver sus misiones principales.</p>}<p className="small muted">Calculado con tu estado guardado. No envía contexto a IA ni consume consultas.</p></section>}
  </fieldset>
 
- {uncertain&&<div className="voice-controls"><button className="button secondary" disabled={working} onClick={()=>{void check()}}>Comprobar resultado</button><button className="text-button" disabled={working} onClick={()=>{void send()}}>Reintentar la misma operación</button></div>}
+ {uncertain&&<div className="voice-controls"><button className="button secondary" disabled={working} onClick={()=>{void check()}}>Comprobar resultado</button><button className="text-button" disabled={working} onClick={()=>{void send(true)}}>Reintentar la misma operación</button></div>}
 
  {(message||error)&&<p className="error-inline" role="alert">{message||error}</p>}
 
@@ -84,7 +111,7 @@ export default function ControlDialog({s,revision,refresh,act,busy,error,close,i
 
  </section>}
 
- <p className="small muted">No guardamos una memoria de esta conversación. Cada consulta usa tu espacio actual y consume el límite diario compartido.</p>
+ {kind!=='project'&&<p className="small muted">No guardamos una memoria de esta conversación. Una solicitud pendiente se conserva temporalmente en esta pestaña para verificarla si cierras el panel. Cada consulta usa tu espacio actual y consume el límite diario compartido.</p>}
 
  </Dialog>
 
