@@ -32,7 +32,7 @@ export default function VoiceDialog({s,revision,refresh,act,busy,error,close,own
 
   <div className={'voice-console '+(connected?'voice-active':'')} role="status"><Radio size={30}/><strong>{wake.listening?'Esperando «Hola Balta»':v.status}</strong><span className="small">{connected?'Sesión de hasta 5 minutos':wake.listening?'Micrófono activo · detección local':'Voz generada por IA · español'}</span></div>
 
-  {!connected&&<label className="assistant-consent"><input type="checkbox" checked={consent} disabled={wake.listening} onChange={e=>setConsent(e.target.checked)}/>Permito enviar mi voz, mis misiones disponibles y sus proyectos a OpenAI durante esta conversación.</label>}
+  {!connected&&<label className="assistant-consent"><input type="checkbox" checked={consent} disabled={wake.listening} onChange={e=>setConsent(e.target.checked)}/>Permito enviar mi voz, mis misiones disponibles, sus proyectos y hasta 20 rutinas previstas hoy (título, duración y estado) a OpenAI durante esta conversación.</label>}
 
   {!connected&&<label className="assistant-consent"><input type="checkbox" checked={auto} onChange={e=>setAuto(e.target.checked)}/>{auto?'Autonomía interna':'Revisar todo'} · Las preguntas y dudas siempre quedan pendientes.</label>}
 

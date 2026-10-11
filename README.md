@@ -85,3 +85,7 @@ Aplicar las migraciones `20261011005518_balthazar_operations.sql` y `20261011010
 ## Edición del avance
 
 Los pasos completados se muestran protegidos en el editor. Solo se editan los pendientes; el servidor rechaza cambiar, reordenar o eliminar el prefijo ya completado. No se recalcula ni se corrige automáticamente el historial existente. Guardar o cancelar una edición vuelve al detalle de esa misma tarea. En Hoy, las misiones completadas muestran minutos reales y puntos concedidos; las pendientes conservan su estimación.
+
+Rutinas personales: Hoy ofrece «Cuidarme hoy» y el editor Rutinas, sin ocupar misiones ni conceder XP, puntos o rachas. El calendario usa la zona horaria del perfil; las acciones normales/breves y omisiones se registran una vez por rutina y fecha, se pueden corregir hoy y se conservan 366 días. Las rutinas pausadas o fuera de su intervalo no crean pendientes. Hasta 100 rutinas, de 1 a 120 minutos; la versión breve no supera la normal.
+
+«Mi semana ligera», «Observar tres días» y el catálogo personal de diez recompensas son paquetes opcionales con selección previa. Se instalan una vez; no modifican saldo ni canjean recompensas. Las observaciones personales quedan fuera de la aplicación. El estado JSON y respaldos incluyen rutinas, registros y marcadores; los respaldos antiguos parten de colecciones vacías. Balta recibe con consentimiento hasta 20 rutinas de hoy (títulos, duraciones, estado), solo como recomendaciones; las realizaciones se guardan con botones.

@@ -4,6 +4,36 @@ import {fresh} from '../app/lib/domain.ts';
 import {createRepository} from '../lib/state-repository.ts';
 import {createBackup,parseBackup} from '../lib/backup.ts';
 import {allowedEmail,isSameOrigin} from '../lib/access.ts';
+import {MAX_BACKUP_BYTES,MAX_BACKUP_REQUEST_BYTES,BACKUP_SIZE_ERROR,readBackupRequest} from '../lib/backup-transfer.ts';
+import {shiftDate} from '../lib/routines.ts';
+
+test('maximum routine history with maximum Unicode titles fits the shared backup transfer limit',async()=>{
+ const state=fresh(),title='漢'.repeat(160),description='漢'.repeat(1000);
+ state.routines=Array.from({length:100},(_,i)=>({id:String(i).padStart(100,'漢'),title,description,area:'Personal',projectId:'',weekdays:[0,1,2,3,4,5,6],startDate:shiftDate(state.lastDay,-365),minutes:120,briefMinutes:120,status:'active'}));
+ state.routineEntries=state.routines.flatMap(r=>Array.from({length:366},(_,i)=>({routineId:r.id,date:shiftDate(state.lastDay,-i),status:'completed',mode:'normal',title,minutes:120,at:Date.now()})));
+ const file=JSON.stringify(createBackup(state),null,2),fileBytes=Buffer.byteLength(file,'utf8');
+ assert.ok(fileBytes>2000000);
+ assert.ok(fileBytes<=MAX_BACKUP_BYTES,'maximum valid routine history must fit the client file limit');
+ const body=JSON.stringify({revision:0,backup:JSON.parse(file)});
+ assert.ok(Buffer.byteLength(body,'utf8')<=MAX_BACKUP_REQUEST_BYTES);
+ const received=JSON.parse(await readBackupRequest(new Request('https://example.com/api/backup',{method:'POST',body})));
+ assert.equal(parseBackup(received.backup).routineEntries.length,36600);
+});
+test('backup body limit counts actual UTF-8 bytes even when Content-Length understates them',async()=>{
+ const request=new Request('https://example.com/api/backup',{method:'POST',headers:{'Content-Length':'1'},body:'漢漢漢'});
+ await assert.rejects(readBackupRequest(request,8),new RegExp(BACKUP_SIZE_ERROR.replace('.','\\.')));
+});
+test('backup body limit accepts its exact byte boundary',async()=>{
+ const request=new Request('https://example.com/api/backup',{method:'POST',body:'漢漢漢'});
+ assert.equal(await readBackupRequest(request,9),'漢漢漢');
+});
+test('oversized backup streams stop before consuming the remaining body',async()=>{
+ let cancelled=false;
+ const stream=new ReadableStream({start(controller){for(let i=0;i<3;i++)controller.enqueue(new TextEncoder().encode('漢'));controller.close()},cancel(){cancelled=true}});
+ const request=new Request('https://example.com/api/backup',{method:'POST',body:stream,duplex:'half'});
+ await assert.rejects(readBackupRequest(request,4),{message:BACKUP_SIZE_ERROR});
+ assert.equal(cancelled,true);
+});
 
 test('public origin is accepted behind Render proxy without trusting forwarded headers',()=>{
  const publicOrigin='https://balthazar-rewards.onrender.com';

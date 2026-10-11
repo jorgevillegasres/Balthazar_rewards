@@ -1,6 +1,6 @@
 # Rutinas personales sostenibles
 
-Estado: diseño concreto para revisión; no implementado ni publicado.
+Estado: autorizado para implementación por «actualiza todoo»; publicación pendiente de verificación.
 
 ## Objetivo y alcance
 
@@ -58,3 +58,9 @@ Pruebas necesarias: días y fecha de inicio, cambio de fecha local, pausa/reacti
 3. Completar o registrar versión breve deja una única realización; omitir no acumula pendientes.
 4. Las rutinas se pueden pausar y editar; la carga semanal permanece visible.
 5. Los datos anteriores, autenticación y respaldos siguen funcionando.
+
+## Alcance adicional autorizado
+
+Se incluye un paquete opcional «Observar tres días» con una sola acción breve por día, desde la fecha de instalación hasta dos días después. Preguntas: «Hoy me hizo bien…», «Hoy me costó…», «Mañana podría facilitarme las cosas haciendo…». No se solicitan ni almacenan respuestas personales: el registro solo marca realización u omisión. El segundo día invita a probar un comienzo de dos minutos y el tercero a elegir algo útil para repetir. Se añade fecha final opcional a las rutinas para dar cierre al ejercicio. El usuario puede instalar este paquete sin instalar la semana ligera.
+
+También se ofrece desde Recompensas el catálogo de diez recompensas ya propuesto, con selección previa, preservando las existentes y evitando nombres duplicados. No canjea ni modifica saldo. No se escriben datos en la cuenta sin sesión autenticada; publicar pone los paquetes disponibles para incorporar desde la interfaz.

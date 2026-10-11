@@ -52,7 +52,7 @@ export default function ControlDialog({s,revision,refresh,act,busy,error,close,i
 
  <label className="assistant-consent"><input type="checkbox" checked={auto} onChange={e=>setAuto(e.target.checked)}/>{auto?'Autonomía interna':'Revisar todo'} · Puedes elegir revisar cada propuesta.</label>
 
- <label className="assistant-consent"><input type="checkbox" checked={consent} onChange={e=>setConsent(e.target.checked)}/>Permito enviar esta solicitud y el contexto necesario a OpenAI durante esta sesión.</label>
+ <label className="assistant-consent"><input type="checkbox" checked={consent} onChange={e=>setConsent(e.target.checked)}/>Permito enviar esta solicitud y el contexto necesario a OpenAI durante esta sesión.{kind==='day'&&' Incluye hasta 20 rutinas previstas hoy: título, duración y estado.'}</label>
 
  <button className="button full" disabled={!consent||!text.trim()||kind==='task'&&!taskId||!Number.isInteger(minutes)||minutes<5||minutes>480} onClick={()=>{void send()}}>{working?'Consultandoââ‚¬¦':'Enviar a Balta'}</button>
 
