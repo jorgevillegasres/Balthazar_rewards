@@ -1,6 +1,6 @@
 # Balthazar — Organización integral de la interfaz
 
-Estado: propuesta concreta para revisión del propietario. No aplicada ni publicada.
+Estado: aprobado por el propietario con «aprobado». Implementación y verificación en curso.
 
 ## Objetivo
 
