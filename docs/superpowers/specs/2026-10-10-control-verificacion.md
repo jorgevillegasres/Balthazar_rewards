@@ -13,3 +13,9 @@ Fecha local: 10 de octubre de 2026.
 - Las llamadas al proveedor y el audio reales no se han probado en esta verificación. El modelo requiere facturación activa, micrófono y consentimiento. No confundir pruebas simuladas con aceptación de voz real.
 
 Las fechas de los nombres de migración fueron generadas por Supabase CLI en UTC; la fecha del trabajo es la local indicada arriba.
+
+## Publicación comprobada
+
+136 pruebas pasan y la compilación de producción termina correctamente. El commit de aplicación `b11c5cf` está en GitHub main y el despliegue `dep-db5e5orrjlhs73anf1cg` está live en Render. Salud: 200/no-store. Actividad y consulta de operación sin sesión: 401/private no-store. Ejecución sin sesión: 401; sin Origin: 403. No se hicieron llamadas reales a IA ni mutaciones del espacio del propietario en estas comprobaciones.
+
+La prueba local usó las vistas reales de Quest con transportes simulados. El centro de mando, los vínculos, la captura automática y Deshacer se comprobaron en interfaz; las pruebas de voz son de protocolo y cancelación, no de micrófono/audio real.

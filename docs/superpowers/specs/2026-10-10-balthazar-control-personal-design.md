@@ -1,6 +1,6 @@
 # Balthazar: centro de control personal
 
-Fecha: 10 de octubre de 2026. Estado: diseño aprobado por el propietario; implementación verificada localmente; publicación en curso.
+Fecha: 10 de octubre de 2026. Estado: diseño aprobado por el propietario; implementación publicada y verificada en Render.
 
 ## Resultado buscado
 

@@ -44,6 +44,6 @@ Archivos: Quest.tsx, globals.css, package.json, README.md, state-repository.ts y
 - [x] Integrar navegación Propósitos/Actividad y entrada texto/voz preservando paleta.
 - [x] Ejecutar `npm test`, `npm run build`, revisión independiente de especificación y seguridad.
 - [x] Aplicar y comprobar RLS/migración con consultas sin datos sensibles; prueba UI con datos ficticios y ancho móvil.
-- [ ] Commit, merge FF y push main; verificar Render live, salud y rechazo sin sesión. Audio real separado de transporte simulado.
+- [x] Commit, merge FF y push main; verificar Render live, salud y rechazo sin sesión. Audio real separado de transporte simulado.
 
 No se considera terminado ningún incremento sin pruebas y compilación. Los registros de conversación, herramientas externas y ejecución en segundo plano quedan fuera.
