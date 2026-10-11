@@ -27,6 +27,5 @@ Files: create `lib/routines.ts`, `lib/personal-catalog.ts`, `app/components/Rout
 - [x] Specification reviewer verifies the approved spec and additional packages; implementer fixes missing behavior. Then separate quality reviewer verifies correctness, validation, CAS/backup and UI interactions.
 - [x] Run production build: `node 'C:/Program Files/nodejs/node_modules/npm/bin/npm-cli.js' run build`; expect all tests and build exit0.
 - [x] Use a temporary local QA fixture with fake authenticated state/transport and real components to exercise package selection, completion/brief/skip/correction and weekly totals on mobile and desktop. Remove fixture before final build. Do not modify user data for QA.
-- [ ] Commit verified app changes, fast-forward main and push existing GitHub remote (publication already authorized). Verify Render live commit via MCP and public health/authentication endpoints. No secrets retrieved or printed.
-- [ ] Mark plan completion with exact evidence and tell user how to install optional packages in their session. Real voice/provider tests remain outside simulated QA.
-
+- [x] Commit verified app changes, fast-forward main and push existing GitHub remote (publication already authorized). Verify Render live commit via MCP and public health/authentication endpoints. No secrets retrieved or printed.
+- [x] Mark plan completion with exact evidence and tell user how to install optional packages in their session. Real voice/provider tests remain outside simulated QA.
