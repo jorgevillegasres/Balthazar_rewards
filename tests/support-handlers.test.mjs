@@ -6,11 +6,11 @@ const fileId='12345678-1234-1234-1234-123456789abc_a.pdf';
 const origin='https://example.test';
 // Isolate synthetic request origins from the deployment environment.
 process.env.BALTHAZAR_APP_ORIGIN=origin;
-function setup({tasks=['task'],counts=[0,1],authenticated=true}={}){
+function setup({tasks=['task'],counts=[0,1],authenticated=true,reserve=false}={}){
  const calls=[];let countIndex=0;
  const bucket={list:async(folder)=>{calls.push(['list',folder]);return {data:Array.from({length:counts[Math.min(countIndex++,counts.length-1)]},(_,i)=>({id:String(i),name:fileId,metadata:{size:3},created_at:'2026-10-04'})),error:null}},download:async(path)=>{calls.push(['download',path]);return {data:new Blob(['private bytes']),error:null}},upload:async(path,file,options)=>{calls.push(['upload',path,file.size,options]);return {error:null}},remove:async(paths)=>{calls.push(['remove',paths]);return {error:null}}};
  const client={storage:{from:(name)=>{calls.push(['bucket',name]);return bucket}}};
- const handlers=createSupportHandlers({authenticate:async()=>authenticated?{client,user:{id:'owner'}}:null,read:async(_client,owner)=>{calls.push(['read',owner]);return {state:{tasks:tasks.map(id=>({id}))}}}});
+ const handlers=createSupportHandlers({...(reserve?{beginUpload:async()=>{calls.push(['reserve']);}}:{}),authenticate:async()=>authenticated?{client,user:{id:'owner'}}:null,read:async(_client,owner)=>{calls.push(['read',owner]);return {state:{tasks:tasks.map(id=>({id}))}}}});
  return {handlers,calls};
 }
 function upload(name='a.pdf',type='application/pdf'){const form=new FormData();form.set('task','task');form.set('file',new File(['pdf'],name,{type}));return new Request(origin+'/api/supports',{method:'POST',headers:{origin},body:form});}
@@ -22,3 +22,4 @@ test('valid upload stores opaque safe filename without overwrite',async()=>{cons
 test('stream bound rejects missing Content-Length and cancels body',async()=>{let cancelled=false;const stream=new ReadableStream({start(c){c.enqueue(new Uint8Array(MAX_SUPPORT_BYTES+65537))},cancel(){cancelled=true}});const {handlers,calls}=setup();const request=new Request(origin+'/api/supports',{method:'POST',headers:{origin,'content-type':'multipart/form-data; boundary=a'},body:stream,duplex:'half'});const res=await handlers.POST(request);assert.equal(res.status,413);assert.equal(cancelled,true);assert.equal(calls.length,0)});
 test('twenty cap rejects before upload and compensates concurrent overflow',async()=>{let fixture=setup({counts:[20]});assert.equal((await fixture.handlers.POST(upload())).status,400);assert.ok(!fixture.calls.some(c=>c[0]==='upload'));fixture=setup({counts:[19,21]});assert.equal((await fixture.handlers.POST(upload())).status,400);const uploaded=fixture.calls.find(c=>c[0]==='upload');assert.deepEqual(fixture.calls.at(-1),['remove',[uploaded[1]]])});
 test('delete cannot address foreign folder',async()=>{const {handlers,calls}=setup();const request=file=>new Request(origin+'/api/supports?task=task&file='+encodeURIComponent(file),{method:'DELETE',headers:{origin}});assert.equal((await handlers.DELETE(request('../'+fileId))).status,400);assert.ok(!calls.some(c=>c[0]==='remove'));assert.equal((await handlers.DELETE(request(fileId))).status,200);assert.deepEqual(calls.at(-1),['remove',['owner/task/'+fileId]])});
+test('upload reserves revision before Storage write',async()=>{const {handlers,calls}=setup({reserve:true});assert.equal((await handlers.POST(upload())).status,201);assert.ok(calls.findIndex(c=>c[0]==='reserve')<calls.findIndex(c=>c[0]==='upload'))});

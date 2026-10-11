@@ -68,6 +68,20 @@ El respaldo JSON v1 conserva la jerarquía y los enlaces y acepta respaldos ante
 
 Las tarjetas de Hoy muestran el avance de subtareas y permiten elegir una acción disponible respetando dependencias y estados de la principal. Los pasos pendientes de una subtarea pueden revisarse desde su detalle; el arranque de cinco minutos sigue siendo una elección explícita. Tras confirmar una subtarea desde enfoque, se vuelve al detalle de la principal. Completar todas las acciones ofrece revisar el resultado, sin cerrar automáticamente la misión ni duplicar recompensas. El contador de Inbox cuenta principales. La asistencia para empezar ofrece retomar la sesión si queda una abierta.
 
+## Centro de control personal
+
+Hoy incluye Centro de mando con principales vencidas, bloqueadas y por organizar. Propósitos permite definir resultados y vincular proyectos, con confirmación del vínculo. El indicador cuenta principales completadas frente a las activas y completadas; no declara automáticamente terminado un propósito. Archivar un propósito conserva sus proyectos y tareas.
+
+«Escribir a Balta» y la voz usan el ejecutor `/api/harness`. En texto se elige captura, plan o subtareas y las referencias en selectores; «Resumir proyecto» es lectura local sin IA ni cuota. Autonomía interna está activada inicialmente y puede cambiarse a revisar propuestas. Solo una instrucción explícita, completa y validada permite guardar; preguntas, negaciones, condiciones, fechas relativas y preguntas esenciales de la propuesta quedan para revisión. La voz exige nombrar claramente el proyecto o la tarea, o indicar «sin proyecto». El modelo no decide permisos. Tras una escritura por voz se cierra la conversación para actualizar su contexto.
+
+Las entradas anteriores de captura asistida pasan por el mismo ejecutor en modo revisión. Las propuestas editadas y los vínculos confirmados generan un comprobante de actividad. Ninguna herramienta completa misiones, canjea recompensas, ejecuta SQL o contacta servicios externos. Los errores de conexión ofrecen comprobar el mismo ID antes de volver a ejecutar; los reintentos conservan la solicitud original.
+
+Actividad muestra ejecuciones, propuestas pendientes, fallos y acciones deshechas. Deshacer creación archiva únicamente pendientes intactos. Las sesiones, avance, relaciones o intentos de adjuntar soportes bloquean la reversión; los archivos privados se comprueban en Storage antes de deshacer. La carga reserva una revisión del estado antes de escribir el archivo, evitando competir con una reversión. Un intento de carga fallido también protege la tarea de esta reversión automática; se puede revisar manualmente.
+
+El estado conserva los 200 comprobantes recientes. Las propuestas/fallos están en `balthazar_operations`, privada con RLS por propietario y correo permitido. La vista y el exportador consultan los últimos 90 días; el exportador avisa si supera 10.000 registros. No hay borrado programado de registros. El JSON de respaldo conserva propósitos, vínculos y comprobantes; las operaciones separadas se descargan desde Actividad, y los archivos requieren respaldo independiente de Storage.
+
+Aplicar las migraciones `20261011005518_balthazar_operations.sql` y `20261011010125_balthazar_operation_undo_status.sql` al reproducir la infraestructura. Se mantiene la cuota de veinte consultas/aperturas por día. La asistencia funciona con datos actuales y no guarda memoria de conversaciones entre sesiones. La verificación de interfaz usa proveedor y datos ficticios; la aceptación del modelo y audio reales se hace con una sesión consentida del propietario.
+
 ## Edición del avance
 
 Los pasos completados se muestran protegidos en el editor. Solo se editan los pendientes; el servidor rechaza cambiar, reordenar o eliminar el prefijo ya completado. No se recalcula ni se corrige automáticamente el historial existente. Guardar o cancelar una edición vuelve al detalle de esa misma tarea. En Hoy, las misiones completadas muestran minutos reales y puntos concedidos; las pendientes conservan su estimación.

@@ -20,7 +20,7 @@ export function useQuest(){
   }catch(e){if(sequence===readSequence.current)setError(e instanceof Error?e.message:'No hay conexión. Intenta de nuevo.')}
   finally{if(sequence===readSequence.current)setLoading(false)}
  },[clearIdentity]);
- useEffect(()=>{void load();const onFocus=()=>{if(!pending.current)void load()};window.addEventListener('focus',onFocus);const interval=setInterval(onFocus,60000);return()=>{window.removeEventListener('focus',onFocus);clearInterval(interval)}},[load]);
+ useEffect(()=>{void load();const onFocus=()=>{if(!pending.current)void load()};window.addEventListener('focus',onFocus);window.addEventListener('balthazar-space-changed',onFocus);const interval=setInterval(onFocus,60000);return()=>{window.removeEventListener('focus',onFocus);window.removeEventListener('balthazar-space-changed',onFocus);clearInterval(interval)}},[load]);
  useEffect(()=>{if(!notice)return;const t=setTimeout(()=>setNotice(''),6000);return()=>clearTimeout(t)},[notice]);
  async function act(command:Omit<Command,'id'>,expectedRevision?:number){
   if(pending.current||!current.current)return false;

@@ -3,8 +3,8 @@ import {useState} from 'react';
 import {Plus,Search,Inbox,Play,Check,Folder,Lock,Archive,Sparkles,Paperclip} from 'lucide-react';
 import {activeChildren,childrenOf,type State,type Task} from '../lib/domain';
 import type {Act} from './useQuest';
-export default function Missions({s,act,busy,capture,edit,start,complete,newProject,assist}:{assist:(t:Task)=>void;s:State;act:Act;busy:boolean;capture:(id?:string)=>void;edit:(t:Task)=>void;start:(t:Task,kind?:string)=>void;complete:(id:string)=>void;newProject:()=>void}){
- const [tab,setTab]=useState('Todas'),[search,setSearch]=useState(''),[area,setArea]=useState('Todas'),[project,setProject]=useState('');
+export default function Missions({s,act,busy,capture,edit,start,complete,newProject,assist,initialProject=''}:{initialProject?:string;assist:(t:Task)=>void;s:State;act:Act;busy:boolean;capture:(id?:string)=>void;edit:(t:Task)=>void;start:(t:Task,kind?:string)=>void;complete:(id:string)=>void;newProject:()=>void}){
+ const [tab,setTab]=useState('Todas'),[search,setSearch]=useState(''),[area,setArea]=useState('Todas'),[project,setProject]=useState(initialProject);
  const query=search.trim().toLocaleLowerCase('es');
  const matches=(t:Task)=>t.title.toLocaleLowerCase('es').includes(query)||childrenOf(s,t.id).some(c=>c.title.toLocaleLowerCase('es').includes(query));
  const list=s.tasks.filter(t=>!t.parentId&&(tab==='Inbox'?t.status==='INBOX':tab==='Completadas'?t.status==='COMPLETADA':tab==='Archivadas'?['ARCHIVADA','CANCELADA'].includes(t.status):!['COMPLETADA','CANCELADA','ARCHIVADA'].includes(t.status))&&(area==='Todas'||t.area===area)&&(!project||t.projectId===project)&&matches(t)).sort((a,b)=>b.created-a.created);

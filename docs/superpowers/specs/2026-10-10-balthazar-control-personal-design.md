@@ -1,6 +1,6 @@
 # Balthazar: centro de control personal
 
-Fecha: 10 de octubre de 2026. Estado: alcance aprobado; diseño detallado pendiente de revisión del propietario.
+Fecha: 10 de octubre de 2026. Estado: diseño aprobado por el propietario; implementación verificada localmente; publicación en curso.
 
 ## Resultado buscado
 
@@ -36,7 +36,7 @@ Para cada cambio reversible se conserva un comprobante con los campos anteriores
 
 Una tarea recién creada solo se puede retirar mediante deshacer si no tiene cambios posteriores, sesiones, avance, soportes, hijos ni dependencias entrantes. Se conserva como archivada y el registro explica la reversión; no hay borrado definitivo. Un plan solo se puede revertir si sus posiciones y estados no cambiaron y no hay enfoque abierto. Las misiones completadas conservan sus posiciones. Los vínculos de proyecto se revierten solo si mantienen el valor aplicado.
 
-El registro es privado y consultable por páginas; se limita a 200 entradas recientes en el estado y 90 días para propuestas/fallos de la tabla de operaciones. La limpieza de la tabla se hará mediante una operación administrativa explícita; no se promete un proceso programado en esta entrega. No se usa el registro como memoria de conversación ni se envía entero al modelo.
+El registro es privado y consultable por páginas; se limita a 200 entradas recientes en el estado y consulta de los últimos 90 días para propuestas/fallos de la tabla de operaciones. La limpieza de la tabla se hará mediante una operación administrativa explícita; no se promete un proceso programado en esta entrega. No se usa el registro como memoria de conversación ni se envía entero al modelo.
 
 ## Incremento 3: Balta como entrada de control
 

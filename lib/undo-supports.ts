@@ -1,0 +1,2 @@
+import type {State} from '../app/lib/domain';
+export async function assertNoFilesForUndo(s:Pick<State,'activity'>,operationId:unknown,list:(taskId:string)=>Promise<{data:unknown[]|null;error:unknown}>){const event=s.activity?.find(a=>a.id===operationId);if(!event||event.status==='undone'||event.receipt.kind!=='capture')return;for(const task of event.receipt.tasks){const result=await list(task.id);if(result.error)throw Error('STORAGE_UNAVAILABLE');if(result.data?.length)throw Error('No se puede deshacer: esta tarea tiene soportes guardados. Revisa sus archivos.')}}
