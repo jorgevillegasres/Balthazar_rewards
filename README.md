@@ -52,6 +52,12 @@ Las pruebas automatizadas y la interfaz usan transporte y audio simulados. La ac
 
 Usar el exportador de la instalación anterior autenticado como propietario, descargar el JSON e importarlo en esta instalación después de crear el acceso. No copiar datos de pruebas locales. Mantener la instalación anterior hasta verificar tareas, saldo, historial y foco desde teléfono y computador. La instalación como PWA debe repetirse para el nuevo dominio.
 
+## Voz y personalidad de Balta
+
+Las nuevas conversaciones usan `cedar`, con instrucciones de voz masculina en español, registro medio-grave y ritmo natural. Balta es un estratega sereno y cercano, con humor satírico, sarcástico, teatral y tierno según el contexto. Ajusta el tono si se pide seriedad o se expresa cansancio; su personalidad no cambia los permisos de las herramientas ni crea memoria entre sesiones.
+
+Texto y voz comparten la definición de `lib/balta-personality.ts`. En las propuestas JSON el humor se concentra en el resumen: los títulos y acciones conservan precisión. Una sesión que ya emitió audio conserva su voz anterior; termina la conversación y abre otra para escuchar la configuración nueva. La audición real en teléfono y computador sigue siendo necesaria para evaluar timbre, naturalidad y equilibrio del humor.
+
 ## Subtareas y soportes
 
 Misiones muestra tareas principales agrupadas por proyecto. Abre una tarea para añadir subtareas o convertir tareas pendientes existentes, conservando sus IDs, sesiones y soportes. Se usa un solo nivel de subtareas, con el área y proyecto de la principal. Las tareas completadas mantienen su historial. Puedes separar una subtarea pendiente y corregir una casilla marcada antes de confirmar el resultado principal.
