@@ -27,5 +27,5 @@
 
 ## 3. Publication
 
-- [ ] Final full production build and git diff --check pass. Commit only intended code/docs, fast-forward main and push authorized GitHub repo.
-- [ ] Verify exact runtime commit live in Render and public endpoints health200/private401/origin403. Record evidence and show final screenshot clearly identified as fictitious QA.
+- [x] Final full production build and git diff --check pass. Commit only intended code/docs, fast-forward main and push authorized GitHub repo.
+- [x] Verify exact runtime commit live in Render and public endpoints health200/private401/origin403. Record evidence and show final screenshot clearly identified as fictitious QA.

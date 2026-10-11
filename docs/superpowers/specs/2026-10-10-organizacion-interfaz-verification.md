@@ -18,4 +18,7 @@ Se aplicó el diseño aprobado conservando la paleta y los comandos existentes. 
 
 ## Publicación
 
-Pendiente de registrar compilación final, commit y despliegue exacto en Render.
+- GitHub `main`: commit de implementación `3e75ed9038dcb55ff91c92822794ab5379fc3b62` publicado tras compilación y revisiones.
+- Render `srv-davj479srm7s73c766rg`: despliegue `dep-db5g1o6k1f9s73ebrfl0` confirmado `live`, commit exacto anterior; terminó 2026-10-11 03:23:50 UTC (2026-10-10 en Bogotá).
+- Comprobación pública posterior: GET `/api/health` 200, `no-store`, estado `ok`; GET `/api/quest` sin sesión 401 y POST sin Origin 403, ambos `private, no-store`.
+- Capturas de escritorio y móvil con datos ficticios inspeccionadas; no se incluyeron en el repositorio.
