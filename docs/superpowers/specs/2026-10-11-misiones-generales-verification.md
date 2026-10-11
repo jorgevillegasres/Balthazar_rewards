@@ -9,4 +9,6 @@
 
 - `npm run build`: salida 0, 173 pruebas aprobadas, TypeScript y compilación correctos; ruta temporal no incluida. `git diff --check` sin errores.
 
-Pendiente de registrar despliegue exacto.
+- GitHub main publicado: `fce424cec8cf50cb1239a14575fd896d95d8b5b8`.
+- Render: `dep-db5ss4rrjlhs73b47ctg`, commit exacto anterior, confirmado live el 11 de octubre de 2026 a las 12:59:11 de Bogotá (17:59:11 UTC).
+- Comprobación pública posterior: health200/no-store/ok, quest sin sesión401/private no-store, POST sin Origin403/private no-store.

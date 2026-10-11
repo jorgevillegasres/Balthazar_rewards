@@ -13,4 +13,4 @@
 - [x] Modificar lib/navigation.ts y tests/navigation.test.mjs: Misiones inicia Vista general; Proyectos conserva pestaña y contexto. Mantener transiciones existentes.
 - [x] Modificar Missions.tsx: pestaña Vista general, control Mostrar subtareas, secciones abiertas, etiquetas proyecto/padre/estado y acciones existentes. `canStartTask` regula Enfoque, además de busy/focus. Añadir CSS acotado para encabezados y filtros sin overflow.
 - [x] Ejecutar build completo, inspeccionar diff y revisar en navegador con transporte ficticio a 390/1440. Eliminar fixture antes de build final. No usar datos de producción.
-- [ ] Commit, push main y verificar commit exacto live en Render; health200/private401/origin403. Registrar resultado.
+- [x] Commit, push main y verificar commit exacto live en Render; health200/private401/origin403. Registrar resultado.
