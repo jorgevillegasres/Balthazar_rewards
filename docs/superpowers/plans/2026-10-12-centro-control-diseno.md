@@ -13,4 +13,4 @@
 - [x] Actualizar navegación, reloj compacto y CSS propio sin copiar bundle Metronic; cuidar 44px, auxiliares12px, texto largo, foco, reduced-motion y páginas secundarias.
 - [x] Revisión de requisitos y código independiente; corregir hallazgos antes de publicar.
 - [x] QA del coordinador con fixture ficticio aislado en navegador, escritorio/móvil, datos/revisiones y voz simulada; retirar ruta y detener servidor de prueba.
-- [ ] Build completo con salida0, Gitdiff limpio, commit funcional y publicaciónmain. Confirmar Render live y pruebasHTTP privadas; guardar cierre documental con límites y evidencia.
+- [x] Build completo con salida0, Gitdiff limpio, commit funcional y publicaciónmain. Confirmar Render live y pruebasHTTP privadas; guardar cierre documental con límites y evidencia.
