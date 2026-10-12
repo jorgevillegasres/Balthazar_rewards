@@ -12,9 +12,9 @@ async function voiceRequest(){
  });
  return session;
 }
-test('new voice sessions request Cedar and retain Spanish, interruption and bounded tools',async()=>{
+test('new voice sessions request Ash and retain Spanish, interruption and bounded tools',async()=>{
  const session=await voiceRequest();
- assert.equal(session.audio.output.voice,'cedar');
+ assert.equal(session.audio.output.voice,'ash');
  assert.equal(session.audio.input.transcription.language,'es');
  assert.equal(session.audio.input.turn_detection.interrupt_response,true);
  assert.equal(session.max_output_tokens,800);
