@@ -54,7 +54,7 @@ Usar el exportador de la instalación anterior autenticado como propietario, des
 
 ## Voz y personalidad de Balta
 
-Las nuevas conversaciones usan `cedar`, con instrucciones de voz masculina en español, registro medio-grave y ritmo natural. Balta es un estratega sereno y cercano, con humor satírico, sarcástico, teatral y tierno según el contexto. Ajusta el tono si se pide seriedad o se expresa cansancio; su personalidad no cambia los permisos de las herramientas. El perfil y los recuerdos elegidos pueden conservarse entre sesiones sin almacenar conversaciones completas.
+Las nuevas conversaciones usan `cedar`, con instrucciones de voz masculina natural en español, timbre sin impostar y expresión acorde con el diálogo. Balta es un estratega cómplice con criterio y observaciones agudas, humor satírico y sarcástico, teatralidad ocasional y ternura según el contexto. Ajusta el tono si se pide seriedad o se expresa cansancio; su personalidad no cambia los permisos de las herramientas. El perfil y los recuerdos elegidos pueden conservarse entre sesiones sin almacenar conversaciones completas.
 
 Texto y voz comparten la definición de `lib/balta-personality.ts`. En las propuestas JSON el humor se concentra en el resumen: los títulos y acciones conservan precisión. Una sesión que ya emitió audio conserva su voz anterior; termina la conversación y abre otra para escuchar la configuración nueva. La audición real en teléfono y computador sigue siendo necesaria para evaluar timbre, naturalidad y equilibrio del humor.
 

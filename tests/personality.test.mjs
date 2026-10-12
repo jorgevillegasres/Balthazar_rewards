@@ -23,12 +23,19 @@ test('new voice sessions request Cedar and retain Spanish, interruption and boun
 });
 test('voice delivery requests masculine expressive speech and respects requested seriousness',async()=>{
  const session=await voiceRequest();
- assert.match(session.instructions,/registro masculino medio-grave/);
+ assert.match(session.instructions,/voz masculina natural/i);
  assert.match(session.instructions,/satírico|sarcástico/);
  assert.match(session.instructions,/histriónico/);
  assert.match(session.instructions,/tierno/);
  assert.match(session.instructions,/pide seriedad/);
  assert.match(session.instructions,/solo afirma que se guardó cuando la herramienta devuelve Guardado/);
+});
+test('spoken delivery encourages a recognizable conversational character without fixed pitch or canned theatrical phrases',async()=>{
+ const session=await voiceRequest();
+ assert.match(session.instructions,/observaciones agudas/);
+ assert.match(session.instructions,/Reacciona a lo que acaba de decir/);
+ assert.match(session.instructions,/No introduzcas un chiste por obligación/);
+ assert.doesNotMatch(session.instructions,/registro masculino medio-grave|La agenda ha solicitado convertirse en trilogía|La orquesta épica puede esperar/);
 });
 test('all text operations share voice personality without decorating task titles or changing JSON contracts',async()=>{
  const voice=await voiceRequest(),personality=voice.instructions.split('# Personalidad\n')[1]?.split('\n# Entrega')[0];
