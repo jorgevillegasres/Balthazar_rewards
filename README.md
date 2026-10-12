@@ -32,7 +32,7 @@ En Hoy → Preparar mi día, Balthazar propone hasta tres tareas disponibles seg
 
 Configurar `OPENAI_API_KEY` solo en Render y `OPENAI_MODEL` si se cambia el modelo. Valor inicial: `gpt-5-mini-2025-08-07`; verificar disponibilidad de la cuenta y evaluar calidad con uso real. La API requiere facturación propia. Sin clave, las consultas muestran un aviso y el resto de la aplicación sigue funcionando. No guardar claves en Git ni usar NEXT_PUBLIC para secretos.
 
-La ruta `/api/assistant` requiere sesión y consentimiento. Envía a OpenAI el contexto mínimo de la función elegida, excluyendo identidad, economía e historial. Usa Responses API con `store:false`, salida estructurada, 2.800 tokens máximos de salida y treinta segundos de espera, sin reintentos automáticos. `store:false` no implica ausencia de toda retención por parte del proveedor: revisar sus controles de datos antes de enviar información sensible. No se persisten conversaciones completas ni se registran los textos enviados. Los pasos y tareas aceptados quedan incluidos en el respaldo normal.
+La ruta `/api/assistant` requiere sesión y consentimiento. Envía a OpenAI el contexto mínimo de la función elegida, excluyendo identidad de la cuenta, economía e historial; incorpora únicamente el apelativo y la personalización que el propietario haya habilitado. Usa Responses API con `store:false`, salida estructurada, 2.800 tokens máximos de salida y treinta segundos de espera, sin reintentos automáticos. `store:false` no implica ausencia de toda retención por parte del proveedor: revisar sus controles de datos antes de enviar información sensible. No se persisten conversaciones completas ni se registran los textos enviados. Los pasos y tareas aceptados quedan incluidos en el respaldo normal.
 
 La cuota es de veinte consultas por día de Bogotá, compartida por todos los dispositivos y reservada atómicamente en Supabase antes de contactar al proveedor. Un intento reservado cuenta incluso si el proveedor falla. Las reservas contienen usuario y fecha, no contenido de tareas. La cuota limita solicitudes, no dinero: configurar también límites/alertas de gasto en OpenAI. La aplicación no dispone de SQL, canjes o herramientas autónomas para el modelo.
 
@@ -42,7 +42,7 @@ La verificación automatizada cubre validación del contexto, referencias, fecha
 
 Hoy → Hablar con Balthazar abre una conversación fluida en español por WebRTC. Requiere micrófono, conexión y consentimiento para enviar voz y contexto actual a OpenAI. Puede proponer un plan, capturar misiones con o sin proyecto y dividir una principal en subtareas. Los borradores se revisan y editan en pantalla; solo Guardar/Aplicar cambia el estado. No completa misiones ni concede recompensas. Conserva las misiones completadas en sus posiciones del día.
 
-La clave existente `OPENAI_API_KEY` se usa exclusivamente en el servidor. `OPENAI_REALTIME_MODEL` es opcional; el valor inicial es `gpt-realtime-2.1`. Una apertura y cada propuesta consumen una reserva de la cuota diaria compartida. Se limita cada sesión a cinco minutos mediante cierre del cliente y temporizador del servidor; los reinicios y fallos de red/proveedor impiden garantizar un límite monetario estricto. No se persiste audio ni conversación en Balthazar. Los controles de retención del proveedor son independientes.
+La clave existente `OPENAI_API_KEY` se usa exclusivamente en el servidor. `OPENAI_REALTIME_MODEL` es opcional; el valor inicial es `gpt-realtime-2.1`. Una apertura y cada propuesta de misiones consumen una reserva de la cuota diaria compartida. Preparar y confirmar un recuerdo en la conversación no abre una consulta adicional al harness. Se limita cada sesión a cinco minutos mediante cierre del cliente y temporizador del servidor; los reinicios y fallos de red/proveedor impiden garantizar un límite monetario estricto. No se persiste audio ni conversación en Balthazar. Los controles de retención del proveedor son independientes.
 
 «Hola Balta» es optativo: requiere panel abierto y visible y reconocimiento local en español compatible con `SpeechRecognition.processLocally`. Si el navegador permite descargar su paquete local, se ofrece un botón para prepararlo. No se sustituye por reconocimiento remoto. Donde no esté disponible se usa el botón de conversación. Ocultar la aplicación o salir detiene las pistas del micrófono y la escucha; no funciona con la pantalla bloqueada ni con la aplicación cerrada.
 
@@ -54,9 +54,19 @@ Usar el exportador de la instalación anterior autenticado como propietario, des
 
 ## Voz y personalidad de Balta
 
-Las nuevas conversaciones usan `cedar`, con instrucciones de voz masculina en español, registro medio-grave y ritmo natural. Balta es un estratega sereno y cercano, con humor satírico, sarcástico, teatral y tierno según el contexto. Ajusta el tono si se pide seriedad o se expresa cansancio; su personalidad no cambia los permisos de las herramientas ni crea memoria entre sesiones.
+Las nuevas conversaciones usan `cedar`, con instrucciones de voz masculina en español, registro medio-grave y ritmo natural. Balta es un estratega sereno y cercano, con humor satírico, sarcástico, teatral y tierno según el contexto. Ajusta el tono si se pide seriedad o se expresa cansancio; su personalidad no cambia los permisos de las herramientas. El perfil y los recuerdos elegidos pueden conservarse entre sesiones sin almacenar conversaciones completas.
 
 Texto y voz comparten la definición de `lib/balta-personality.ts`. En las propuestas JSON el humor se concentra en el resumen: los títulos y acciones conservan precisión. Una sesión que ya emitió audio conserva su voz anterior; termina la conversación y abre otra para escuchar la configuración nueva. La audición real en teléfono y computador sigue siendo necesaria para evaluar timbre, naturalidad y equilibrio del humor.
+
+## Perfil y recuerdos elegidos
+
+En **Perfil → Configuración** se configura «Así trabaja Balta conmigo»: apelativo opcional, forma de trabajar, humor y acompañamiento. «Usar mi perfil y mis recuerdos» habilita su inclusión en consultas consentidas; está desactivado inicialmente. Desactivar conserva lo guardado y lo excluye de consultas nuevas. No se usa el nombre de la cuenta como apelativo automático.
+
+«Lo que Balta recuerda» conserva hasta veinte textos de 400 caracteres que el usuario decidió guardar. Permite revisar, editar y confirmar el borrado de uno o todos. El JSON privado del propietario y el respaldo incluyen esta información; los respaldos anteriores pueden conservar recuerdos borrados del espacio activo. No hay extracción automática de conversaciones ni diagnósticos o perfilado inferido.
+
+Por texto: **Balta → Escribir → Guardar un recuerdo · sin IA**, o el editor del Perfil. Por voz: una petición explícita como «recuerda que…» genera un borrador editable; **Guardar recuerdo** confirma solo ese texto, cierra la sesión y usa el comando autenticado con control de revisión. No se guarda automáticamente, incluso en Autonomía interna. Para editar o borrar se usa Perfil. Las consultas de IA de captura/plan/subtareas no tienen una herramienta para guardar recuerdos: indican estos controles.
+
+No se modifican tablas ni políticas de Supabase: la personalización está en el estado JSON privado existente. Los importadores aceptan respaldos anteriores sin el campo y no pueden sobrescribir un espacio con personalización configurada. Las pruebas usan datos, micrófono y transporte ficticios; falta validar voz y estilo reales con el propietario.
 
 ## Subtareas y soportes
 
@@ -86,7 +96,7 @@ Actividad muestra ejecuciones, propuestas pendientes, fallos y acciones deshecha
 
 El estado conserva los 200 comprobantes recientes. Las propuestas/fallos están en `balthazar_operations`, privada con RLS por propietario y correo permitido. La vista y el exportador consultan los últimos 90 días; el exportador avisa si supera 10.000 registros. No hay borrado programado de registros. El JSON de respaldo conserva propósitos, vínculos y comprobantes; las operaciones separadas se descargan desde Actividad, y los archivos requieren respaldo independiente de Storage.
 
-Aplicar las migraciones `20261011005518_balthazar_operations.sql` y `20261011010125_balthazar_operation_undo_status.sql` al reproducir la infraestructura. Se mantiene la cuota de veinte consultas/aperturas por día. La asistencia funciona con datos actuales y no guarda memoria de conversaciones entre sesiones. La verificación de interfaz usa proveedor y datos ficticios; la aceptación del modelo y audio reales se hace con una sesión consentida del propietario.
+Aplicar las migraciones `20261011005518_balthazar_operations.sql` y `20261011010125_balthazar_operation_undo_status.sql` al reproducir la infraestructura. Se mantiene la cuota de veinte consultas/aperturas por día. La asistencia funciona con datos actuales y el perfil y recuerdos que el propietario habilitó; no conserva conversaciones completas entre sesiones. La verificación de interfaz usa proveedor y datos ficticios; la aceptación del modelo y audio reales se hace con una sesión consentida del propietario.
 
 ## Edición del avance
 

@@ -18,7 +18,7 @@ test('new voice sessions request Cedar and retain Spanish, interruption and boun
  assert.equal(session.audio.input.transcription.language,'es');
  assert.equal(session.audio.input.turn_detection.interrupt_response,true);
  assert.equal(session.max_output_tokens,800);
- assert.deepEqual(session.tools.map(t=>t.name),['organize_day','capture_tasks','split_task']);
+ assert.deepEqual(session.tools.map(t=>t.name),['organize_day','capture_tasks','split_task','remember_information']);
  assert.ok(!JSON.stringify(session).includes('test-only-key'));
 });
 test('voice delivery requests masculine expressive speech and respects requested seriousness',async()=>{

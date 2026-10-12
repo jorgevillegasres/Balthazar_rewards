@@ -1,5 +1,6 @@
 import {routineContext} from './routines.ts';
 import {personalityInstructions} from './balta-personality.ts';
+import {baltaContext} from './balta-profile.ts';
 import {z} from 'zod';
 
 import {priority,dayKey,type State,type Task} from '../app/lib/domain.ts';
@@ -24,7 +25,8 @@ const brief=(t:Task)=>({id:t.id,title:t.title.slice(0,160),area:t.area.slice(0,6
 
 export function buildContext(s:State,r:Pick<AssistantRequest,'kind'> & Partial<AssistantRequest>){
 
- const base={kind:r.kind,today:dayKey(Date.now(),s.profile.timezone),text:r.text||'',purposes:(s.purposes||[]).filter(p=>p.status==='active').slice(0,20).map(p=>({id:p.id,title:p.title.slice(0,160),area:p.area.slice(0,60),description:p.description.slice(0,300),due:p.due}))};
+ const personalization=baltaContext(s);
+ const base={kind:r.kind,today:dayKey(Date.now(),s.profile.timezone),text:r.text||'',...(personalization?{personalization}:{}),purposes:(s.purposes||[]).filter(p=>p.status==='active').slice(0,20).map(p=>({id:p.id,title:p.title.slice(0,160),area:p.area.slice(0,60),description:p.description.slice(0,300),due:p.due}))};
 
  if(r.kind==='capture'){
 

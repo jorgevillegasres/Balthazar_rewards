@@ -407,6 +407,7 @@ summary{cursor:pointer;min-height:44px;padding:10px 0;font-weight:600;color:var(
 
 .skip-link{position:fixed;top:8px;left:8px;z-index:1000;transform:translateY(-200%);background:var(--surface);color:var(--ink);border:2px solid var(--accent);padding:12px 18px;font-weight:600}
 .skip-link:focus{transform:translateY(0)}
+
 [data-navigation-focus]:focus-visible{outline:2px solid var(--accent);outline-offset:6px}
 @media(max-width:600px){
  .authenticated-app .task-list>article.task-row{display:grid;grid-template-columns:44px minmax(0,1fr);align-items:start}
@@ -415,3 +416,27 @@ summary{cursor:pointer;min-height:44px;padding:10px 0;font-weight:600;color:var(
  .authenticated-app .task-list>article.task-row>:is(.points-pill,.text-button){grid-column:2;justify-self:end}
  .authenticated-app .task-list>article.task-row .icon-button{min-width:44px;min-height:44px}
 }
+
+/* Personalisation stays inside the owner's Profile configuration. */
+.balta-settings{display:grid;gap:18px;margin:24px 0}
+.balta-settings .card{min-width:0}
+.balta-settings h2{font:500 26px var(--display)}
+.balta-settings fieldset{padding:0;border:0;margin:0;min-width:0}
+.balta-settings label{display:block;margin-top:18px}
+.balta-settings :is(input:not([type=checkbox]),textarea,select){display:block;width:100%;max-width:100%;min-height:44px;margin-top:8px;background:var(--input);border:1px solid var(--control-line);color:var(--ink);font-size:16px;padding:12px}
+.balta-settings textarea{resize:vertical}
+.balta-settings .balta-sharing{display:flex;gap:12px;align-items:flex-start;line-height:1.6}
+.balta-settings .balta-sharing input{width:20px;height:20px;margin:3px 0 0;flex-shrink:0;accent-color:var(--accent)}
+.balta-settings .balta-count{margin:6px 0 12px;text-align:right}
+.balta-settings .balta-actions{display:flex;align-items:center;flex-wrap:wrap;gap:10px}
+.balta-settings .balta-memory-list{list-style:none;padding:0;margin:20px 0}
+.balta-settings .balta-memory-list li{display:flex;align-items:flex-start;justify-content:space-between;gap:16px;padding:16px 0;border-bottom:1px solid var(--line)}
+.balta-settings .balta-memory-list li>div:first-child{min-width:0;flex:1}
+.balta-settings .balta-memory-list p,.balta-settings .balta-delete-text{margin:0 0 8px;white-space:pre-wrap;overflow-wrap:anywhere}
+.balta-settings .balta-memory-list .balta-actions{flex-shrink:0}
+.balta-settings .balta-empty{margin-top:24px}
+.balta-settings .balta-delete-confirmation{border:1px solid var(--accent);background:var(--raised);padding:16px;margin-top:18px;overflow-wrap:anywhere}
+.balta-settings .balta-delete-confirmation h3{margin:0 0 12px}
+.balta-settings .balta-privacy{border-top:1px solid var(--line);margin-top:24px;padding-top:16px}
+.balta-settings .balta-save-status{margin:0;color:var(--accent)}
+@media(max-width:600px){.balta-settings .balta-memory-list li{flex-wrap:wrap}.balta-settings .balta-memory-list .balta-actions{margin-left:auto}.balta-settings form .button{width:100%}.balta-settings .balta-delete-confirmation .button{width:100%}}

@@ -8,8 +8,9 @@ import type {Proposal} from '../../lib/assistant';
 
 import {voiceToolInput} from '../../lib/voice';
 import {transcriptionForTurn} from '../../lib/harness';
+import {memoryDraftForTurn,type MemoryDraft} from '../../lib/voice-memory';
 
-export type VoiceDraft=({kind:'day';summary:string;items:Proposal['items'];revision:number}|{kind:'capture'|'subtasks';summary:string;tasks:Proposal['tasks'];revision:number;parentId?:string})&{operationId:string;questions:string[]};
+export type VoiceDraft=MemoryDraft|(({kind:'day';summary:string;items:Proposal['items'];revision:number}|{kind:'capture'|'subtasks';summary:string;tasks:Proposal['tasks'];revision:number;parentId?:string})&{operationId:string;questions:string[]});
 
 type Line={id:string;who:'Tú'|'Balta';text:string};
 // Only operation IDs survive closing this panel; no transcript or request body does.
@@ -72,6 +73,14 @@ export function useVoice(s:State,revision:number,refresh:()=>Promise<void>,auto=
 
     const name=call.name as keyof typeof voiceToolInput;if(!Object.hasOwn(voiceToolInput,name)||call.arguments.length>12000)throw Error('Propuesta no admitida.');
 
+    if(name==='remember_information'){
+     const memory=memoryDraftForTurn(userTurn,userText,JSON.parse(call.arguments),current.current.revision,crypto.randomUUID());
+     setDraft(memory);
+     output={summary:memory.summary,status:'Borrador de recuerdo pendiente en pantalla. No guardado. Requiere el botón Guardar recuerdo.'};
+     send({type:'conversation.item.create',item:{type:'function_call_output',call_id:call.call_id,output:JSON.stringify(output)}});
+     return;
+    }
+
     const input=voiceToolInput[name].parse(JSON.parse(call.arguments));
 
     const request=name==='organize_day'?{kind:'day',...input}:name==='capture_tasks'?{kind:'capture',...input}:{kind:'task',...input};
@@ -127,7 +136,7 @@ export function useVoice(s:State,revision:number,refresh:()=>Promise<void>,auto=
 
    const dc=r.channel=pc.createDataChannel('oai-events');
 
-   dc.onopen=()=>{if(!active())return;opening.current=false;connected.current=true;setStatus('Escuchando');send({type:'response.create',response:{instructions:'Saluda brevemente: «Aquí estoy. ¿Organizamos tu día?»'}})};
+   dc.onopen=()=>{if(!active())return;opening.current=false;connected.current=true;setStatus('Escuchando');send({type:'response.create',response:{instructions:'Saluda brevemente con una variación natural e invita a conversar. Usa el apelativo elegido solo si preferredName aparece en personalization; no inventes un nombre.'}})};
 
    dc.onmessage=async e=>{
 

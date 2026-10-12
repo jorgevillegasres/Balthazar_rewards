@@ -21,7 +21,7 @@ export default function ControlDialog({s,revision,refresh,act,busy,error,close,o
 
  const [previous]=useState(()=>textOperations.pending(owner));
  const recovered=previous?JSON.parse(previous.body):null;
- const [kind,setKind]=useState<'capture'|'day'|'task'|'project'>(recovered?.kind||initialKind),[text,setText]=useState(recovered?.text||''),[projectId,setProject]=useState(recovered?.projectId||initialProjectId),[taskId,setTask]=useState(recovered?.taskId||initialTaskId),[minutes,setMinutes]=useState(recovered?.minutes||25),[energy,setEnergy]=useState(recovered?.energy||s.profile.energy),[auto,setAuto]=useState(recovered?recovered.mode==='auto':true),[consent,setConsent]=useState(!!recovered?.consent),[working,setWorking]=useState(false),[message,setMessage]=useState(previous?'Hay una operación pendiente. Comprueba su resultado antes de continuar.':''),[result,setResult]=useState<Result|null>(null),[uncertain,setUncertain]=useState(!!previous);
+ const [kind,setKind]=useState<'capture'|'day'|'task'|'project'|'memory'>(recovered?.kind||initialKind),[text,setText]=useState(recovered?.text||''),[projectId,setProject]=useState(recovered?.projectId??initialProjectId),[taskId,setTask]=useState(recovered?.taskId||initialTaskId),[minutes,setMinutes]=useState(recovered?.minutes||25),[energy,setEnergy]=useState(recovered?.energy||s.profile.energy),[auto,setAuto]=useState(recovered?recovered.mode==='auto':true),[consent,setConsent]=useState(!!recovered?.consent),[working,setWorking]=useState(false),[message,setMessage]=useState(previous?'Hay una operación pendiente. Comprueba su resultado antes de continuar.':''),[result,setResult]=useState<Result|null>(null),[uncertain,setUncertain]=useState(!!previous);
  const mounted=useRef(true);
  useEffect(()=>{mounted.current=true;return()=>{mounted.current=false}},[]);
  const request=useRef<PendingTextOperation|null>(previous);
@@ -41,7 +41,7 @@ export default function ControlDialog({s,revision,refresh,act,busy,error,close,o
  async function check(){const operation=request.current;if(!operation||working)return;setWorking(true);try{const res=await fetch('/api/harness?id='+encodeURIComponent(operation.operationId),{cache:'no-store'});const data=await res.json();if(!res.ok)throw Error(data.error);await acceptReply(data,operation)}catch(e){if(mounted.current)setMessage(e instanceof Error?e.message:'No se pudo comprobar el resultado.')}finally{if(mounted.current)setWorking(false)}}
 
  async function send(retry=false){
-  if(kind==='project'||working)return;
+  if(kind==='project'||kind==='memory'||working)return;
   if(!request.current){
    if(retry)return;
    const operationId=crypto.randomUUID(),operation={operationId,body:JSON.stringify({kind,text,projectId,taskId,minutes,energy,revision,consent,source:'text',mode:auto?'auto':'review',operationId})};
@@ -57,15 +57,15 @@ export default function ControlDialog({s,revision,refresh,act,busy,error,close,o
   }catch(e){if(mounted.current){setMessage(e instanceof Error?e.message:'Se perdió la conexión. Comprueba el resultado antes de reintentar.');if(request.current)setUncertain(true)}}finally{if(mounted.current)setWorking(false)}
  }
 
- async function apply(){if(!result||result.proposal.questions.length||kind==='project')return;try{const command=proposalCommand(s,{kind,taskId},result.proposal);if(await act({type:'baltaAction',operationId:result.operationId,source:'text',summary:result.proposal.summary.slice(0,300),inputRevision:result.revision,command},result.revision))setResult({...result,status:'executed'})}catch(e){setMessage(e instanceof Error&&e.message==='DUPLICATE_TASK'?'Hay tareas repetidas; corrige el borrador.':'Revisa el borrador antes de aplicar.') }}
+ async function apply(){if(!result||result.proposal.questions.length||kind==='project'||kind==='memory')return;try{const command=proposalCommand(s,{kind,taskId},result.proposal);if(await act({type:'baltaAction',operationId:result.operationId,source:'text',summary:result.proposal.summary.slice(0,300),inputRevision:result.revision,command},result.revision))setResult({...result,status:'executed'})}catch(e){setMessage(e instanceof Error&&e.message==='DUPLICATE_TASK'?'Hay tareas repetidas; corrige el borrador.':'Revisa el borrador antes de aplicar.') }}
 
  return <Dialog title="Centro de control · Balta" close={close}>
 
- {kind!=='project'&&<p className="muted">Dime qué necesitas. Una instrucción explícita puede guardar acciones internas; las preguntas y dudas muestran un borrador.</p>}
+ {kind!=='project'&&kind!=='memory'&&<p className="muted">Dime qué necesitas. Una instrucción explícita puede guardar acciones internas; las preguntas y dudas muestran un borrador.</p>}
 
  <fieldset disabled={busy||working||uncertain} style={{border:0,padding:0,margin:0}}>
 
- <div className="form-grid"><label>Acción<select value={kind} onChange={e=>{setKind(e.target.value as typeof kind);setResult(null)}}><option value="capture">Capturar pendientes</option><option value="day">Organizar el día</option><option value="task">Crear subtareas</option><option value="project">Resumir proyecto · sin IA</option></select></label>
+ <div className="form-grid"><label>Acción<select value={kind} onChange={e=>{setKind(e.target.value as typeof kind);setResult(null);setMessage('')}}><option value="capture">Capturar pendientes</option><option value="day">Organizar el día</option><option value="task">Crear subtareas</option><option value="memory">Guardar un recuerdo · sin IA</option><option value="project">Resumir proyecto · sin IA</option></select></label>
 
  {(kind==='capture'||kind==='project')&&<label>Proyecto<select value={projectId} onChange={e=>{setProject(e.target.value);setResult(null)}}><option value="">Sin proyecto</option>{s.projects.map(p=><option key={p.id} value={p.id}>{p.name}</option>)}</select></label>}
 
@@ -75,11 +75,13 @@ export default function ControlDialog({s,revision,refresh,act,busy,error,close,o
 
  {kind==='day'&&<div className="form-grid"><label>Minutos disponibles<input type="number" min={5} max={480} value={minutes} onChange={e=>setMinutes(Number(e.target.value))}/></label><label>Energía<select value={energy} onChange={e=>setEnergy(e.target.value as typeof energy)}><option>baja</option><option>media</option><option>alta</option></select></label></div>}
 
- {kind!=='project'&&<><label>Tu instrucción o pregunta<textarea maxLength={5000} rows={4} value={text} onChange={e=>{setText(e.target.value);setResult(null)}} placeholder="Crea una tarea para revisar el informe"/></label>
+ {kind==='memory'&&<><p className="muted">Escribe exactamente lo que quieres que Balta recuerde. Revisa el contenido antes de guardarlo; no se envía a IA para crear el recuerdo.</p><label>Recuerdo para Balta<textarea maxLength={400} rows={4} value={text} onChange={e=>{setText(e.target.value);setMessage('')}} placeholder="Me ayuda estudiar en bloques de veinte minutos"/></label><p className="small muted">Podrás editarlo y borrarlo en Perfil → Configuración. Se usa en consultas nuevas solo si habilitas allí tu perfil y recuerdos.</p><button className="button full" disabled={!text.trim()||text.length>400} onClick={async()=>{setMessage('');if(await act({type:'baltaRemember',text,confirmed:true})){setText('');setMessage('Recuerdo guardado. Puedes revisarlo en Perfil → Configuración.')}}}>Guardar recuerdo</button></>}
+
+ {kind!=='project'&&kind!=='memory'&&<><label>Tu instrucción o pregunta<textarea maxLength={5000} rows={4} value={text} onChange={e=>{setText(e.target.value);setResult(null)}} placeholder="Crea una tarea para revisar el informe"/></label>
 
  <label className="assistant-consent"><input type="checkbox" checked={auto} onChange={e=>setAuto(e.target.checked)}/>{auto?'Autonomía interna':'Revisar todo'} · Puedes elegir revisar cada propuesta.</label>
 
- <label className="assistant-consent"><input type="checkbox" checked={consent} onChange={e=>setConsent(e.target.checked)}/>Permito enviar esta solicitud, mis áreas, los datos de los proyectos y misiones necesarios para esta acción y hasta 20 propósitos activos (título, descripción, área y fecha) a OpenAI durante esta sesión.{kind==='day'&&' Incluye hasta 20 rutinas previstas hoy: título, duración y estado.'}</label>
+ <label className="assistant-consent"><input type="checkbox" checked={consent} onChange={e=>setConsent(e.target.checked)}/>Permito enviar esta solicitud, mis áreas, los datos de los proyectos y misiones necesarios para esta acción y hasta 20 propósitos activos (título, descripción, área y fecha) a OpenAI durante esta sesión. Incluye mi perfil de Balta y los recuerdos que haya habilitado.{kind==='day'&&' Incluye hasta 20 rutinas previstas hoy: título, duración y estado.'}</label>
 
  <button className="button full" disabled={!consent||!text.trim()||kind==='task'&&!taskId||!Number.isInteger(minutes)||minutes<5||minutes>480} onClick={()=>{void send()}}>{working?'Consultando…':'Enviar a Balta'}</button></>}
 
@@ -88,7 +90,7 @@ export default function ControlDialog({s,revision,refresh,act,busy,error,close,o
 
  {uncertain&&<div className="voice-controls"><button className="button secondary" disabled={working} onClick={()=>{void check()}}>Comprobar resultado</button><button className="text-button" disabled={working} onClick={()=>{void send(true)}}>Reintentar la misma operación</button></div>}
 
- {(message||error)&&<p className="error-inline" role="alert">{message||error}</p>}
+ {(message||error)&&<p className={kind==='memory'&&!error?'hint':'error-inline'} role={kind==='memory'&&!error?'status':'alert'}>{message||error}</p>}
 
  {result&&<section className="voice-draft"><h3>{result.status==='executed'?'Guardado':result.status==='undone'?'Acción deshecha':'Propuesta pendiente'}</h3><p>{result.proposal.summary}</p><AssistantQuestions questions={result.proposal.questions}/>
 
@@ -111,7 +113,7 @@ export default function ControlDialog({s,revision,refresh,act,busy,error,close,o
 
  </section>}
 
- {kind!=='project'&&<p className="small muted">No guardamos una memoria de esta conversación. Una solicitud pendiente se conserva temporalmente en esta pestaña para verificarla si cierras el panel. Cada consulta usa tu espacio actual y consume el límite diario compartido.</p>}
+ {kind!=='project'&&kind!=='memory'&&<p className="small muted">No guardamos esta conversación. Solo conservamos el perfil y los recuerdos que tú hayas elegido guardar. Una solicitud pendiente se conserva temporalmente en esta pestaña para verificarla si cierras el panel. Cada consulta usa tu espacio actual y consume el límite diario compartido.</p>}
 
  </Dialog>
 
