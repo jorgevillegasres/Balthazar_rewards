@@ -2,7 +2,11 @@ export function captureProject(form: FormData, initialProject: string) {
  return form.get('projectId') ?? initialProject;
 }
 
-export type MissionFilters={tab:string;search:string;area:string;showSubtasks:boolean};
+export type MissionFilters={tab:string;search:string;area:string;showSubtasks:boolean;expandedTaskIds?:string[]};
+export function toggleMissionExpansion(filters:MissionFilters,taskId:string):MissionFilters {
+ const expanded=filters.expandedTaskIds??[];
+ return {...filters,expandedTaskIds:expanded.includes(taskId)?expanded.filter(id=>id!==taskId):[...expanded,taskId]};
+}
 export type MissionViews={owner:string|null;views:Record<string,MissionFilters>};
 export function missionFiltersFor(state:MissionViews,owner:string|null,page:string):MissionFilters {
  if(state.owner===owner&&state.views[page])return state.views[page];

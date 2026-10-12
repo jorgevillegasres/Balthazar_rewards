@@ -22,6 +22,17 @@ test('own and inherited dependencies block until their prerequisite is completed
  s.tasks.find(t=>t.id==='p1').status='BLOQUEADA';
  assert.equal(missionBlocked(s,s.tasks.find(t=>t.id==='child')),true);
 });
+
+test('child result controls stay blocked when their parent is closed or missing',()=>{
+ for(const status of ['ARCHIVADA','CANCELADA','COMPLETADA']){
+  const parent=task('parent',{status}),child=task('child',{parentId:'parent'}),s={tasks:[parent,child]};
+  assert.equal(missionBlocked(s,child),true,status);
+ }
+ const parent=task('parent',{completed:1}),child=task('child',{parentId:'parent'}),s={tasks:[parent,child]};
+ assert.equal(missionBlocked(s,child),true,'completed timestamp also makes parent unavailable');
+ s.tasks=[child];assert.equal(missionBlocked(s,child),true,'missing parent');
+ s.tasks.unshift(task('parent'));assert.equal(missionBlocked(s,child),false,'available parent');
+});
 test('search finds child and parent context; area filter is respected',()=>{
  const s=fixture();s.tasks.find(t=>t.id==='p2').area='Trabajo';
  assert.deepEqual(ids(overviewGroups(s,{query:'child'})),['p1']);

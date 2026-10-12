@@ -6,6 +6,26 @@ test('More preserves secondary destinations',()=>assert.deepEqual(secondaryPages
 test('project entry initializes its grid and retains selected project context',()=>{assert.deepEqual(missionView('Proyectos',''),{initialTab:'Proyectos',initialProject:''});assert.deepEqual(missionView('Proyectos','p1'),{initialTab:'Proyectos',initialProject:'p1'});assert.deepEqual(missionView('Misiones','p1'),{initialTab:'Vista general',initialProject:'p1'});});
 import {navigateTo} from '../lib/navigation.ts';
 import {captureProject,missionFiltersFor,createDialogFocusReturn} from '../lib/ui-state.ts';
+import * as uiState from '../lib/ui-state.ts';
+
+test('inline expansion toggles a mission without changing filters or other expansions',()=>{
+ const saved={tab:'Inbox',search:'contrato',area:'Trabajo',showSubtasks:false,expandedTaskIds:['a']};
+ assert.equal(typeof uiState.toggleMissionExpansion,'function');
+ const expanded=uiState.toggleMissionExpansion(saved,'b');
+ assert.deepEqual(expanded,{...saved,expandedTaskIds:['a','b']});
+ assert.deepEqual(uiState.toggleMissionExpansion(expanded,'a'),{...saved,expandedTaskIds:['b']});
+ assert.deepEqual(saved.expandedTaskIds,['a']);
+});
+
+test('inline expansion survives page remount but never leaks to another account',()=>{
+ const saved={tab:'Vista general',search:'',area:'Todas',showSubtasks:true,expandedTaskIds:['parent']};
+ assert.equal(typeof uiState.toggleMissionExpansion,'function');
+ const state={owner:'a',views:{Misiones:uiState.toggleMissionExpansion(saved,'second')}};
+ assert.deepEqual(missionFiltersFor(state,'a','Misiones').expandedTaskIds,['parent','second']);
+ assert.equal(missionFiltersFor(state,'b','Misiones').expandedTaskIds,undefined);
+ assert.equal(missionFiltersFor(state,'a','Proyectos').expandedTaskIds,undefined);
+ assert.deepEqual(uiState.toggleMissionExpansion({...saved,expandedTaskIds:undefined},'first').expandedTaskIds,['first']);
+});
 test('mission filters survive view remount and remain independent per page',()=>{
  const saved={tab:'Inbox',search:'contrato',area:'Trabajo',showSubtasks:true};
  const state={owner:'account-a',views:{Misiones:saved}};

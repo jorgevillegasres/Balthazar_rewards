@@ -17,7 +17,7 @@ import {AssistantQuestions} from './AssistantCommon';
 
 type Result={proposal:Proposal;revision:number;operationId:string;status:'pending'|'executed'|'undone'};
 
-export default function ControlDialog({s,revision,refresh,act,busy,error,close,owner,initialKind='capture',initialTaskId='',initialProjectId=''}:{s:State;revision:number;refresh:()=>Promise<void>;act:Act;busy:boolean;error:string;close:()=>void;owner:string;initialKind?:'capture'|'day'|'task';initialTaskId?:string;initialProjectId?:string}){
+export default function ControlDialog({s,revision,refresh,act,busy,error,close,owner,initialKind='capture',initialTaskId='',initialProjectId=''}:{s:State;revision:number;refresh:()=>Promise<void>;act:Act;busy:boolean;error:string;close:()=>void;owner:string;initialKind?:'capture'|'day'|'task'|'memory';initialTaskId?:string;initialProjectId?:string}){
 
  const [previous]=useState(()=>textOperations.pending(owner));
  const recovered=previous?JSON.parse(previous.body):null;

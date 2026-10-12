@@ -3,6 +3,7 @@ import type {State,Task} from '../app/lib/domain.ts';
 const closed=(t:Task)=>!!t.completed||['COMPLETADA','ARCHIVADA','CANCELADA'].includes(t.status);
 export function missionBlocked(s:State,t:Task){
  const parent=t.parentId?s.tasks.find(p=>p.id===t.parentId):undefined;
+ if(t.parentId&&(!parent||closed(parent)))return true;
  return [t,parent].some(item=>item&&(item.status==='BLOQUEADA'||!!item.dependency&&!s.tasks.some(d=>d.id===item.dependency&&d.completed)));
 }
 export function overviewGroups(s:State,{showSubtasks=false,query='',area='Todas'}:{showSubtasks?:boolean;query?:string;area?:string}){
