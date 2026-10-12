@@ -136,7 +136,7 @@ export function useVoice(s:State,revision:number,refresh:()=>Promise<void>,auto=
 
    const dc=r.channel=pc.createDataChannel('oai-events');
 
-   dc.onopen=()=>{if(!active())return;opening.current=false;connected.current=true;setStatus('Escuchando');send({type:'response.create',response:{instructions:'Saluda brevemente con una variación natural e invita a conversar. Usa el apelativo elegido solo si preferredName aparece en personalization; no inventes un nombre.'}})};
+   dc.onopen=()=>{if(!active())return;opening.current=false;connected.current=true;setStatus('Escuchando');send({type:'response.create',response:{instructions:'Abre con una intervención breve y fresca, como un socio tranquilo. Deja espacio para que el usuario hable, sin una pregunta obligatoria ni fórmulas de atención al cliente. Usa el apelativo elegido solo si preferredName aparece en personalization; no inventes un nombre.'}})};
 
    dc.onmessage=async e=>{
 

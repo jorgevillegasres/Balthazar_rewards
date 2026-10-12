@@ -25,10 +25,19 @@ test('voice delivery requests masculine expressive speech and respects requested
  const session=await voiceRequest();
  assert.match(session.instructions,/voz masculina natural/i);
  assert.match(session.instructions,/satírico|sarcástico/);
- assert.match(session.instructions,/histriónico/);
+ assert.match(session.instructions,/misterio sutil/);
  assert.match(session.instructions,/tierno/);
  assert.match(session.instructions,/pide seriedad/);
  assert.match(session.instructions,/solo afirma que se guardó cuando la herramienta devuelve Guardado/);
+});
+test('Balta behaves as a calm partner without automatic paraphrases, interviews or forced planning',async()=>{
+ const session=await voiceRequest();
+ assert.match(session.instructions,/socio tranquilo/);
+ assert.match(session.instructions,/reformulaciones automáticas/);
+ assert.match(session.instructions,/No cierres cada respuesta con una pregunta/);
+ assert.match(session.instructions,/Para organizar el día/);
+ assert.match(session.instructions,/en una charla, no empujes/);
+ assert.doesNotMatch(session.instructions,/Tu humor puede ser satírico, sarcástico e histriónico/);
 });
 test('spoken delivery encourages a recognizable conversational character without fixed pitch or canned theatrical phrases',async()=>{
  const session=await voiceRequest();
