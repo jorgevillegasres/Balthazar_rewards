@@ -7,9 +7,9 @@ Se conserva Cedar, el modelo, la detección de turnos, permisos, contexto, recue
 La definición compartida está en `lib/balta-personality.ts`; solo la entrega hablada modifica ritmo/expresión. Los tests de `tests/personality.test.mjs` capturan las instrucciones enviadas a Realtime, la voz Cedar, la coherencia con texto y los contratos previos; no certifican calidad acústica.
 
 - [x] Observar regresiones fallidas de voz natural y ausencia de ejemplos teatrales fijos antes de cambiar el prompt.
-- [ ] Ajustar instrucciones de personalidad y entrega hablada; conservar límites, memoria y reglas de herramientas.
-- [ ] Revisar de forma independiente y ejecutar suite/build.
-- [ ] Publicar GitHub, confirmar Render live y comprobar HTTP privado.
-- [ ] Registrar resultados y pedir una escucha comparativa en una conversación nueva; no afirmar que el sonido real fue verificado.
+- [x] Ajustar instrucciones de personalidad y entrega hablada; conservar límites, memoria y reglas de herramientas.
+- [x] Revisar de forma independiente y ejecutar suite/build.
+- [x] Publicar GitHub, confirmar Render live y comprobar HTTP privado.
+- [x] Registrar resultados y pedir una escucha comparativa en una conversación nueva; no afirmar que el sonido real fue verificado.
 
 Fuente oficial consultada: [Prompting Realtime models](https://developers.openai.com/api/docs/guides/voice-prompting), recomendaciones de brevedad, claridad, variedad y evaluación iterativa de ejemplos.
